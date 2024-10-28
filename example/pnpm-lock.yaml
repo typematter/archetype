@@ -1,0 +1,32 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@accuser/archetype':
+        specifier: github:accuser/archetype
+        version: https://codeload.github.com/accuser/archetype/tar.gz/0a28d7d43697c040050778af284494a46200af82
+
+packages:
+
+  '@accuser/archetype@https://codeload.github.com/accuser/archetype/tar.gz/0a28d7d43697c040050778af284494a46200af82':
+    resolution: {tarball: https://codeload.github.com/accuser/archetype/tar.gz/0a28d7d43697c040050778af284494a46200af82}
+    version: 0.0.1-next.3
+
+  yaml@2.6.0:
+    resolution: {integrity: sha512-a6ae//JvKDEra2kdi1qzCyrJW/WZCgFi8ydDV+eXExl95t+5R+ijnqHJbz9tmMh8FUjx3iv2fCQ4dclAQlO2UQ==}
+    engines: {node: '>= 14'}
+    hasBin: true
+
+snapshots:
+
+  '@accuser/archetype@https://codeload.github.com/accuser/archetype/tar.gz/0a28d7d43697c040050778af284494a46200af82':
+    dependencies:
+      yaml: 2.6.0
+
+  yaml@2.6.0: {}
