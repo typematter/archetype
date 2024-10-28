@@ -1,14 +1,14 @@
+import type { Archetype } from '$types/archetype.js';
+import type { ValidationResult } from '$types/validation-result.js';
 import { describe, expect, it, vi } from 'vitest';
-import type { Archetype } from './archetype.js';
-import { bootstrapArchetypeValidation } from './bootstrap-archetype-validation.js';
-import loadArchetype from './load-archetype.js';
-import validateArchetype from './validate-archetype.js';
-import type { ValidationResult } from './validation-result.js';
+import bootstrap from './bootstrap.js';
+import loadArchetype from './loading/load-archetype.js';
+import validateArchetype from './validation/validate-archetype.js';
 
-vi.mock('./load-archetype.js');
-vi.mock('./validate-archetype.js');
+vi.mock('./loading/load-archetype.js');
+vi.mock('./validation/validate-archetype.js');
 
-describe('bootstrapArchetypeValidation', () => {
+describe('bootstrap', () => {
 	const archetypeSchema: Archetype = {
 		name: 'archetype',
 		version: '1.0.0',
@@ -35,7 +35,7 @@ describe('bootstrapArchetypeValidation', () => {
 		vi.mocked(loadArchetype).mockResolvedValueOnce(archetypeSchema);
 		vi.mocked(validateArchetype).mockReturnValueOnce(validValidationResult);
 
-		const result = await bootstrapArchetypeValidation();
+		const result = await bootstrap();
 
 		expect(result.archetypeSchema).toEqual(archetypeSchema);
 		expect(result.loadArchetype).toBeInstanceOf(Function);
@@ -46,6 +46,6 @@ describe('bootstrapArchetypeValidation', () => {
 		vi.mocked(loadArchetype).mockResolvedValueOnce(archetypeSchema);
 		vi.mocked(validateArchetype).mockReturnValueOnce(invalidValidationResult);
 
-		await expect(bootstrapArchetypeValidation()).rejects.toThrow('Invalid archetype schema');
+		await expect(bootstrap()).rejects.toThrow('Invalid archetype schema');
 	});
 });
