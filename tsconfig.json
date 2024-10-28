@@ -9,7 +9,7 @@
 		"declaration": true,
 		"declarationMap": true,
 		"emitDeclarationOnly": true,
-		"outDir": "./dist",
+		"outDir": "dist",
 		"rootDir": "./src",
 		"types": ["node"],
 		"allowSyntheticDefaultImports": true,
@@ -37,8 +37,8 @@
 		"alwaysStrict": true,
 		"baseUrl": "./",
 		"paths": {
-			"$lib/*.js": ["src/lib/*.ts"],
-			"$types/*.js": ["src/types/*.ts"]
+			"$lib/*": ["src/lib/*"],
+			"$types/*": ["src/types/*"]
 		},
 		"useDefineForClassFields": true
 	},

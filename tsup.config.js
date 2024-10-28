@@ -1,18 +1,17 @@
-import * as esbuild from 'esbuild';
-import { execSync } from 'node:child_process';
+import { defineConfig } from 'tsup';
 
-execSync('tsc --emitDeclarationOnly', { stdio: 'inherit' });
-
-await esbuild.build({
+export default defineConfig({
 	banner: {
 		js: '// Generated with esbuild'
 	},
 	bundle: true,
+	clean: true,
+	dts: true,
 	entryPoints: ['src/index.ts'],
 	external: ['yaml'],
 	format: 'esm',
 	outdir: 'dist',
 	platform: 'node',
 	sourcemap: true,
-	target: 'esnext'
+	treeshake: true
 });
