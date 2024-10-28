@@ -1,7 +1,7 @@
+import type { Archetype } from '$types/archetype.js';
+import type { ValidationResult } from '$types/validation-result.js';
 import { describe, expect, it } from 'vitest';
-import type { Archetype } from './archetype.js';
 import validateArchetype from './validate-archetype.js';
-import type { ValidationResult } from './validation-result.js';
 
 describe('validateArchetype', () => {
 	const personSchema: Archetype = {

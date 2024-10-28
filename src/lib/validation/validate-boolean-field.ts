@@ -1,5 +1,5 @@
-import type { BooleanField } from './schema-field.js';
-import type { ValidationError } from './validation-error.js';
+import type { BooleanField } from '$types/schema-field.js';
+import type { ValidationError } from 'src/types/validation-error.js';
 
 const validateBooleanField = (
 	value: unknown,

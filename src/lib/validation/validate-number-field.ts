@@ -1,5 +1,5 @@
-import type { NumberField } from './schema-field.js';
-import type { ValidationError } from './validation-error.js';
+import type { NumberField } from '$types/schema-field.js';
+import type { ValidationError } from 'src/types/validation-error.js';
 
 const validateNumberField = (
 	value: unknown,

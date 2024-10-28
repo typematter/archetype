@@ -1,7 +1,7 @@
+import type { UnknownField } from '$types/schema-field.js';
+import type { ValidationError } from 'src/types/validation-error.js';
 import { describe, expect, it } from 'vitest';
-import type { UnknownField } from './schema-field.js';
 import validateSchemaField from './validate-schema-field.js';
-import type { ValidationError } from './validation-error.js';
 
 describe('validateSchemaField', () => {
 	it('should validate string fields', () => {

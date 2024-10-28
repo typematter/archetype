@@ -1,6 +1,6 @@
-import type { ObjectField } from './schema-field.js';
+import type { ObjectField } from '$types/schema-field.js';
+import type { ValidationError } from 'src/types/validation-error.js';
 import validateSchemaField from './validate-schema-field.js';
-import type { ValidationError } from './validation-error.js';
 
 const validateObjectField = (
 	value: unknown,

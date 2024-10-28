@@ -1,17 +1,17 @@
-import isArrayField from './is-array-field.js';
-import isBooleanField from './is-boolean-field.js';
-import isDateField from './is-date-field.js';
-import isNumberField from './is-number-field.js';
-import isObjectField from './is-object-field.js';
-import isStringField from './is-string-field.js';
-import type { UnknownField } from './schema-field.js';
+import type { UnknownField } from '$types/schema-field.js';
+import type { ValidationError } from 'src/types/validation-error.js';
+import isArrayField from '../guards/is-array-field.js';
+import isBooleanField from '../guards/is-boolean-field.js';
+import isDateField from '../guards/is-date-field.js';
+import isNumberField from '../guards/is-number-field.js';
+import isObjectField from '../guards/is-object-field.js';
+import isStringField from '../guards/is-string-field.js';
 import validateArrayField from './validate-array-field.js';
 import validateBooleanField from './validate-boolean-field.js';
 import validateDateField from './validate-date-field.js';
 import validateNumberField from './validate-number-field.js';
 import validateObjectField from './validate-object-field.js';
 import validateStringField from './validate-string-field.js';
-import type { ValidationError } from './validation-error.js';
 
 const validateSchemaField = (
 	value: unknown,

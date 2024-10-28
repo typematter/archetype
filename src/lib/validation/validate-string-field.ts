@@ -1,5 +1,5 @@
-import type { StringField } from './schema-field.js';
-import type { ValidationError } from './validation-error.js';
+import type { StringField } from '$types/schema-field.js';
+import type { ValidationError } from 'src/types/validation-error.js';
 
 const validateStringField = (
 	value: unknown,

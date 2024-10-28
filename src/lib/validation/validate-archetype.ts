@@ -1,8 +1,8 @@
-import type { Archetype } from './archetype.js';
-import type { SchemaField } from './schema-field.js';
+import type { Archetype } from '$types/archetype.js';
+import type { SchemaField } from '$types/schema-field.js';
+import type { ValidationResult } from '$types/validation-result.js';
+import type { ValidationError } from 'src/types/validation-error.js';
 import validateSchemaField from './validate-schema-field.js';
-import type { ValidationError } from './validation-error.js';
-import type { ValidationResult } from './validation-result.js';
 
 const validateArchetype = (archetype: unknown, archetypeSchema: Archetype): ValidationResult => {
 	const errors: ValidationError[] = [];

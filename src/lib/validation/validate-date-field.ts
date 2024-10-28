@@ -1,5 +1,5 @@
-import type { DateField } from './schema-field.js';
-import type { ValidationError } from './validation-error.js';
+import type { DateField } from '$types/schema-field.js';
+import type { ValidationError } from 'src/types/validation-error.js';
 
 const validateDateField = (
 	value: unknown,

@@ -1,6 +1,6 @@
-import type { ArrayField } from './schema-field.js';
+import type { ArrayField } from '$types/schema-field.js';
+import type { ValidationError } from 'src/types/validation-error.js';
 import validateSchemaField from './validate-schema-field.js';
-import type { ValidationError } from './validation-error.js';
 
 const validateArrayField = (
 	value: unknown,
