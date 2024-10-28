@@ -1,4 +1,4 @@
-import type { UnknownField } from './schema-field.js';
+import type { UnknownField } from '$types/schema-field.js';
 
 const isUnknownField = (field: unknown): field is UnknownField =>
 	field !== undefined &&
