@@ -1,8 +1,8 @@
 {
 	"compilerOptions": {
-		"module": "NodeNext",
-		"moduleResolution": "NodeNext",
-		"target": "ES2022",
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"target": "es2022",
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"skipLibCheck": true,
@@ -34,8 +34,14 @@
 		"resolvePackageJsonImports": true,
 		"preserveConstEnums": true,
 		"strictBuiltinIteratorReturn": true,
-		"alwaysStrict": true
+		"alwaysStrict": true,
+		"baseUrl": "./",
+		"paths": {
+			"$lib/*.js": ["src/lib/*.ts"],
+			"$types/*.js": ["src/types/*.ts"]
+		},
+		"useDefineForClassFields": true
 	},
-	"include": ["src/**/*.ts", "src/types/validation-error.ts"],
+	"include": ["src/**/*.ts"],
 	"exclude": ["dist", "node_modules", "tests/**/*.ts"]
 }
