@@ -1,0 +1,65 @@
+{
+	"name": "@accuser/archetype",
+	"version": "0.0.1-next.1",
+	"description": "Archetype system for validating frontmatter.",
+	"private": false,
+	"type": "module",
+	"main": "dist/index.js",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"files": [
+		"dist"
+	],
+	"packageManager": "pnpm@9.12.2",
+	"scripts": {
+		"build": "node build.js",
+		"clean": "rm -Rf dist",
+		"dev": "vitest --watch src",
+		"format": "prettier --write {src,tests}/**/*.{js,ts}",
+		"lint": "eslint",
+		"test": "pnpm test:unit && pnpm test:integration",
+		"test:unit": "vitest --run src",
+		"test:integration": "pnpm build && vitest --run tests"
+	},
+	"keywords": [
+		"archetype",
+		"frontmatter",
+		"typescript"
+	],
+	"author": {
+		"email": "mhgibbons@me.com",
+		"name": "Matthew Gibbons",
+		"url": "https://github.com/accuser"
+	},
+	"license": "MIT",
+	"publishConfig": {
+		"@accuser:registry": "https://npm.pkg.github.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/accuser/archetype.git"
+	},
+	"bugs": {
+		"url": "https://github.com/accuser/archetype/issues"
+	},
+	"devDependencies": {
+		"@types/node": "^22.5.5",
+		"@typescript-eslint/eslint-plugin": "^8.6.0",
+		"@typescript-eslint/parser": "^8.6.0",
+		"esbuild": "^0.24.0",
+		"eslint": "^9.11.0",
+		"eslint-config-prettier": "^9.1.0",
+		"prettier": "^3.3.3",
+		"tslib": "^2.7.0",
+		"typescript": "^5.6.2",
+		"vitest": "^2.1.1"
+	},
+	"dependencies": {
+		"yaml": "^2.6.0"
+	}
+}

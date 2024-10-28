@@ -1,0 +1,1 @@
+{"version":3,"file":"validate-archetype.d.ts","sourceRoot":"","sources":["../../src/lib/validate-archetype.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,SAAS,EAAE,MAAM,gBAAgB,CAAC;AAIhD,OAAO,KAAK,EAAE,gBAAgB,EAAE,MAAM,wBAAwB,CAAC;AAE/D,QAAA,MAAM,iBAAiB,cAAe,OAAO,mBAAmB,SAAS,KAAG,gBAyC3E,CAAC;AAEF,eAAe,iBAAiB,CAAC"}
