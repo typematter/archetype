@@ -7285,11 +7285,11 @@ var require_dist = __commonJS({
   }
 });
 
-// src/lib/bootstrap-archetype-validation.ts
+// src/lib/bootstrap.ts
 import { join as join2 } from "node:path";
 import { cwd } from "node:process";
 
-// src/lib/load-archetype.ts
+// src/lib/loading/load-archetype.ts
 var import_yaml = __toESM(require_dist(), 1);
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -7304,35 +7304,35 @@ var loadArchetype = async (name, path) => {
 };
 var load_archetype_default = loadArchetype;
 
-// src/lib/is-unknown-field.ts
+// src/lib/guards/is-unknown-field.ts
 var isUnknownField = (field) => field !== void 0 && field !== null && typeof field === "object" && "type" in field && typeof field.type === "string";
 var is_unknown_field_default = isUnknownField;
 
-// src/lib/is-array-field.ts
+// src/lib/guards/is-array-field.ts
 var isArrayField = (field) => is_unknown_field_default(field) && field.type === "Array";
 var is_array_field_default = isArrayField;
 
-// src/lib/is-boolean-field.ts
+// src/lib/guards/is-boolean-field.ts
 var isBooleanField = (field) => is_unknown_field_default(field) && field.type === "Boolean";
 var is_boolean_field_default = isBooleanField;
 
-// src/lib/is-date-field.ts
+// src/lib/guards/is-date-field.ts
 var isDateField = (field) => is_unknown_field_default(field) && field.type === "Date";
 var is_date_field_default = isDateField;
 
-// src/lib/is-number-field.ts
+// src/lib/guards/is-number-field.ts
 var isNumberField = (field) => is_unknown_field_default(field) && field.type === "Number";
 var is_number_field_default = isNumberField;
 
-// src/lib/is-object-field.ts
+// src/lib/guards/is-object-field.ts
 var isObjectField = (field) => is_unknown_field_default(field) && field.type === "Object";
 var is_object_field_default = isObjectField;
 
-// src/lib/is-string-field.ts
+// src/lib/guards/is-string-field.ts
 var isStringField = (field) => is_unknown_field_default(field) && field.type === "String";
 var is_string_field_default = isStringField;
 
-// src/lib/validate-array-field.ts
+// src/lib/validation/validate-array-field.ts
 var validateArrayField = (value, field, path = []) => {
   const errors = [];
   if (!Array.isArray(value)) {
@@ -7362,7 +7362,7 @@ var validateArrayField = (value, field, path = []) => {
 };
 var validate_array_field_default = validateArrayField;
 
-// src/lib/validate-boolean-field.ts
+// src/lib/validation/validate-boolean-field.ts
 var validateBooleanField = (value, field, path = []) => {
   const errors = [];
   if (typeof value !== "boolean") {
@@ -7377,7 +7377,7 @@ var validateBooleanField = (value, field, path = []) => {
 };
 var validate_boolean_field_default = validateBooleanField;
 
-// src/lib/validate-date-field.ts
+// src/lib/validation/validate-date-field.ts
 var validateDateField = (value, field, path = []) => {
   const errors = [];
   if (typeof value !== "string" || isNaN(Date.parse(value))) {
@@ -7398,7 +7398,7 @@ var validateDateField = (value, field, path = []) => {
 };
 var validate_date_field_default = validateDateField;
 
-// src/lib/validate-number-field.ts
+// src/lib/validation/validate-number-field.ts
 var validateNumberField = (value, field, path = []) => {
   const errors = [];
   if (typeof value !== "number") {
@@ -7425,7 +7425,7 @@ var validateNumberField = (value, field, path = []) => {
 };
 var validate_number_field_default = validateNumberField;
 
-// src/lib/validate-object-field.ts
+// src/lib/validation/validate-object-field.ts
 var validateObjectField = (value, field, path = []) => {
   const errors = [];
   if (typeof value !== "object" || value === null) {
@@ -7456,7 +7456,7 @@ var validateObjectField = (value, field, path = []) => {
 };
 var validate_object_field_default = validateObjectField;
 
-// src/lib/validate-string-field.ts
+// src/lib/validation/validate-string-field.ts
 var validateStringField = (value, field, path = []) => {
   const errors = [];
   if (typeof value !== "string") {
@@ -7483,7 +7483,7 @@ var validateStringField = (value, field, path = []) => {
 };
 var validate_string_field_default = validateStringField;
 
-// src/lib/validate-schema-field.ts
+// src/lib/validation/validate-schema-field.ts
 var validateSchemaField = (value, field, path = []) => {
   if (is_string_field_default(field)) {
     return validate_string_field_default(value, field, path);
@@ -7503,7 +7503,7 @@ var validateSchemaField = (value, field, path = []) => {
 };
 var validate_schema_field_default = validateSchemaField;
 
-// src/lib/validate-archetype.ts
+// src/lib/validation/validate-archetype.ts
 var validateArchetype = (archetype, archetypeSchema) => {
   const errors = [];
   for (const [fieldName, fieldSchema] of Object.entries(archetypeSchema.schema.required)) {
@@ -7530,20 +7530,23 @@ var validateArchetype = (archetype, archetypeSchema) => {
 };
 var validate_archetype_default = validateArchetype;
 
-// src/lib/bootstrap-archetype-validation.ts
-var bootstrapArchetypeValidation = async ({ root = join2(cwd(), "data", "archetypes") } = {}) => {
+// src/lib/bootstrap.ts
+var bootstrap = async ({
+  root = join2(cwd(), "data", "archetypes")
+} = {}) => {
   const archetypeSchema = await load_archetype_default("archetype", root.toString());
-  if (!validate_archetype_default(archetypeSchema, archetypeSchema).valid) {
-    throw new Error("Invalid archetype schema");
+  const { errors, valid } = validate_archetype_default(archetypeSchema, archetypeSchema);
+  if (errors.length === 0 && valid) {
+    return {
+      archetypeSchema,
+      loadArchetype: (name) => load_archetype_default(name, root.toString()),
+      validateArchetype: (archetype) => validate_archetype_default(archetype, archetypeSchema)
+    };
   }
-  return {
-    archetypeSchema,
-    loadArchetype: (name) => load_archetype_default(name, root.toString()),
-    validateArchetype: (archetype) => validate_archetype_default(archetype, archetypeSchema)
-  };
+  throw new Error("Invalid archetype schema", { cause: errors });
 };
-var bootstrap_archetype_validation_default = bootstrapArchetypeValidation;
+var bootstrap_default = bootstrap;
 export {
-  bootstrap_archetype_validation_default as bootstrap
+  bootstrap_default as bootstrap
 };
 //# sourceMappingURL=index.js.map
