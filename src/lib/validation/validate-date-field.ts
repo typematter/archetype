@@ -1,5 +1,6 @@
 import type { DateField } from '$types/schema-field.js';
 import type { ValidationError } from 'src/types/validation-error.js';
+import { isValidDate } from './iso8601.js';
 
 const validateDateField = (
 	value: unknown,
@@ -17,7 +18,7 @@ const validateDateField = (
 		];
 	}
 
-	if (field.format === 'ISO-8601' && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(value)) {
+	if (field.format === 'ISO-8601' && isValidDate(value) === false) {
 		errors.push({
 			path,
 			message: 'Date must be in ISO-8601 format'
