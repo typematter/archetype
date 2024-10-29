@@ -10,7 +10,7 @@ const validateSchemaField: (
 	const validator = validators[field.type];
 
 	if (validator) {
-		return validator(value, field as any, path);
+		return validator(value, field as never, path);
 	}
 
 	throw new Error(`No validator found for type: ${field.type}`);

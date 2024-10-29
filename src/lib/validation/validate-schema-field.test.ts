@@ -62,7 +62,7 @@ describe('validateSchemaField', () => {
 		const field: UnknownField = { type: 'unknown' };
 		const value = 'test';
 
-		expect(() => validateSchemaField(value, field as any)).toThrow(
+		expect(() => validateSchemaField(value, field as never)).toThrow(
 			'No validator found for type: unknown'
 		);
 	});

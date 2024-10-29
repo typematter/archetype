@@ -50,7 +50,7 @@ describe('validators', () => {
 
 	testCases.forEach(({ type, value, field, expectedErrors }) => {
 		it(`should validate ${type} field correctly`, () => {
-			const errors: ValidationError[] = validators[type](value, field as any, []);
+			const errors: ValidationError[] = validators[type](value, field as never, []);
 
 			expect(errors).toEqual(expectedErrors);
 		});
