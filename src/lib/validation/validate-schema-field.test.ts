@@ -5,7 +5,7 @@ import validateSchemaField from './validate-schema-field.js';
 
 describe('validateSchemaField', () => {
 	it('should validate string fields', () => {
-		const field = { type: 'String' };
+		const field = { type: 'String' as const };
 		const value = 'test';
 
 		const errors: ValidationError[] = validateSchemaField(value, field);
@@ -14,7 +14,7 @@ describe('validateSchemaField', () => {
 	});
 
 	it('should validate number fields', () => {
-		const field = { type: 'Number' };
+		const field = { type: 'Number' as const };
 		const value = 123;
 
 		const errors: ValidationError[] = validateSchemaField(value, field);
@@ -23,7 +23,7 @@ describe('validateSchemaField', () => {
 	});
 
 	it('should validate boolean fields', () => {
-		const field = { type: 'Boolean' };
+		const field = { type: 'Boolean' as const };
 		const value = true;
 
 		const errors: ValidationError[] = validateSchemaField(value, field);
@@ -32,8 +32,8 @@ describe('validateSchemaField', () => {
 	});
 
 	it('should validate date fields', () => {
-		const field = { type: 'Date', format: 'ISO8601' };
-		const value = new Date().toDateString();
+		const field = { type: 'Date' as const, format: 'ISO-8601' as const };
+		const value = new Date().toISOString();
 
 		const errors: ValidationError[] = validateSchemaField(value, field);
 
@@ -41,7 +41,7 @@ describe('validateSchemaField', () => {
 	});
 
 	it('should validate array fields', () => {
-		const field = { type: 'Array', items: { type: 'String' } };
+		const field = { type: 'Array' as const, items: { type: 'String' as const } };
 		const value = ['test'];
 
 		const errors: ValidationError[] = validateSchemaField(value, field);
@@ -50,7 +50,7 @@ describe('validateSchemaField', () => {
 	});
 
 	it('should validate object fields', () => {
-		const field = { type: 'Object', properties: { key: { type: 'String' } } };
+		const field = { type: 'Object' as const, properties: { key: { type: 'String' as const } } };
 		const value = { key: 'test' };
 
 		const errors: ValidationError[] = validateSchemaField(value, field);
@@ -62,6 +62,8 @@ describe('validateSchemaField', () => {
 		const field: UnknownField = { type: 'unknown' };
 		const value = 'test';
 
-		expect(() => validateSchemaField(value, field)).toThrow('Unknown field type: unknown');
+		expect(() => validateSchemaField(value, field as any)).toThrow(
+			'No validator found for type: unknown'
+		);
 	});
 });
