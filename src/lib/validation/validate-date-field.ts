@@ -1,6 +1,6 @@
 import type { DateField } from '$types/schema-field.js';
 import type { ValidationError } from 'src/types/validation-error.js';
-import { isValidDate } from './iso8601.js';
+import { isValidDate } from './date-format/iso8601.js';
 
 const validateDateField = (
 	value: unknown,
