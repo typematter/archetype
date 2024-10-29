@@ -44,6 +44,8 @@ const parseDate: (dateString: string) => Date = (dateString) => {
 	if (dateMatch) {
 		const [, y, m, d, h, min, s, ms, tz, o, hoff, minoff] = dateMatch;
 
+		void tz;
+
 		const year = Number(y);
 		const month = Number(m);
 		const day = Number(d);
