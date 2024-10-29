@@ -16,34 +16,6 @@ var loadArchetype = async (name, path) => {
 };
 var load_archetype_default = loadArchetype;
 
-// src/lib/guards/is-unknown-field.ts
-var isUnknownField = (field) => field !== void 0 && field !== null && typeof field === "object" && "type" in field && typeof field.type === "string";
-var is_unknown_field_default = isUnknownField;
-
-// src/lib/guards/is-array-field.ts
-var isArrayField = (field) => is_unknown_field_default(field) && field.type === "Array";
-var is_array_field_default = isArrayField;
-
-// src/lib/guards/is-boolean-field.ts
-var isBooleanField = (field) => is_unknown_field_default(field) && field.type === "Boolean";
-var is_boolean_field_default = isBooleanField;
-
-// src/lib/guards/is-date-field.ts
-var isDateField = (field) => is_unknown_field_default(field) && field.type === "Date";
-var is_date_field_default = isDateField;
-
-// src/lib/guards/is-number-field.ts
-var isNumberField = (field) => is_unknown_field_default(field) && field.type === "Number";
-var is_number_field_default = isNumberField;
-
-// src/lib/guards/is-object-field.ts
-var isObjectField = (field) => is_unknown_field_default(field) && field.type === "Object";
-var is_object_field_default = isObjectField;
-
-// src/lib/guards/is-string-field.ts
-var isStringField = (field) => is_unknown_field_default(field) && field.type === "String";
-var is_string_field_default = isStringField;
-
 // src/lib/validation/validate-array-field.ts
 var validateArrayField = (value, field, path = []) => {
   const errors = [];
@@ -89,6 +61,93 @@ var validateBooleanField = (value, field, path = []) => {
 };
 var validate_boolean_field_default = validateBooleanField;
 
+// src/lib/validation/iso8601.ts
+var ISO8601_FORMATS = {
+  CALENDAR: /^(\d{4})-([01]\d)-([0-3]\d)(?:T([012]\d):([0-5]\d):([0-5]\d)(?:\.(\d+))?(Z|([+-])([01]\d):([0-5]\d))?)?$/,
+  ORDINAL: /^(\d{4})-(\d{3})$/,
+  WEEK: /^(\d{4})-W([0-5]\d)(?:-([1-7]))?$/
+};
+var parseWeekDate = (year, week, day = 1) => {
+  const jan4th = new Date(year, 0, 4);
+  const startOfWeek1 = new Date(jan4th);
+  startOfWeek1.setDate(jan4th.getDate() - jan4th.getDay() + 1);
+  const targetDate = new Date(startOfWeek1);
+  targetDate.setDate(startOfWeek1.getDate() + (week - 1) * 7 + (day - 1));
+  if (targetDate.getFullYear() !== year) {
+    throw new Error("Invalid week date");
+  }
+  return targetDate;
+};
+var parseOrdinalDate = (year, ordinalDay) => {
+  const date = new Date(year, 0, 1);
+  date.setDate(ordinalDay);
+  if (date.getFullYear() !== year) {
+    throw new Error("Invalid ordinal date");
+  }
+  return date;
+};
+var parseDate = (dateString) => {
+  const dateMatch = dateString.match(ISO8601_FORMATS.CALENDAR);
+  if (dateMatch) {
+    const [, y, m, d, h, min, s, ms, tz, o, hoff, minoff] = dateMatch;
+    const year = Number(y);
+    const month = Number(m);
+    const day = Number(d);
+    const hour = h ? Number(h) : 0;
+    const minute = min ? Number(min) : 0;
+    const second = s ? Number(s) : 0;
+    const millisecond = ms ? Number(ms) : 0;
+    const hourOffset = hoff ? Number(`${o}${hoff}`) : 0;
+    const minuteOffset = minoff ? Number(`${o}${minoff}`) : 0;
+    const date = new Date(dateString);
+    if (date instanceof Date === false) {
+      throw new Error("Invalid calendar date");
+    } else if (date.getFullYear() !== year || date.getMonth() + 1 !== month || date.getDate() !== day || date.getHours() !== hour - hourOffset || date.getMinutes() !== minute - minuteOffset || date.getSeconds() !== second || date.getMilliseconds() !== millisecond) {
+      throw new Error("Invalid calendar date");
+    } else {
+      return date;
+    }
+  }
+  const weekMatch = dateString.match(ISO8601_FORMATS.WEEK);
+  if (weekMatch) {
+    const [, y, w, d] = weekMatch;
+    const year = Number(y);
+    const week = Number(w);
+    const day = d ? Number(d) : 1;
+    if (week < 1 || week > 53) {
+      throw new Error("Invalid week number");
+    }
+    if (week === 53) {
+      const dec31 = new Date(year, 11, 31);
+      const lastWeek = Math.floor((dec31.getTime() - new Date(year, 0, 1).getTime()) / (864e5 * 7)) + 1;
+      if (lastWeek !== 53) {
+        throw new Error("Invalid week number");
+      }
+    }
+    return parseWeekDate(year, week, day);
+  }
+  const ordinalMatch = dateString.match(ISO8601_FORMATS.ORDINAL);
+  if (ordinalMatch) {
+    const [, y, od] = ordinalMatch;
+    const year = Number(y);
+    const ordinalDay = Number(od);
+    const isLeapYear = year % 4 === 0 && year % 100 !== 0 || year % 400 === 0;
+    const maxDays = isLeapYear ? 366 : 365;
+    if (ordinalDay < 1 || ordinalDay > maxDays) {
+      throw new Error("Invalid ordinal day number");
+    }
+    return parseOrdinalDate(year, ordinalDay);
+  }
+  throw new Error("Invalid ISO-8601 date format");
+};
+var isValidDate = (date) => {
+  try {
+    return parseDate(date) instanceof Date;
+  } catch {
+    return false;
+  }
+};
+
 // src/lib/validation/validate-date-field.ts
 var validateDateField = (value, field, path = []) => {
   const errors = [];
@@ -100,7 +159,7 @@ var validateDateField = (value, field, path = []) => {
       }
     ];
   }
-  if (field.format === "ISO-8601" && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(value)) {
+  if (field.format === "ISO-8601" && isValidDate(value) === false) {
     errors.push({
       path,
       message: "Date must be in ISO-8601 format"
@@ -195,23 +254,24 @@ var validateStringField = (value, field, path = []) => {
 };
 var validate_string_field_default = validateStringField;
 
+// src/lib/validation/validators.ts
+var validators = {
+  Array: validate_array_field_default,
+  Boolean: validate_boolean_field_default,
+  Date: validate_date_field_default,
+  Number: validate_number_field_default,
+  Object: validate_object_field_default,
+  String: validate_string_field_default
+};
+var validators_default = validators;
+
 // src/lib/validation/validate-schema-field.ts
 var validateSchemaField = (value, field, path = []) => {
-  if (is_string_field_default(field)) {
-    return validate_string_field_default(value, field, path);
-  } else if (is_number_field_default(field)) {
-    return validate_number_field_default(value, field, path);
-  } else if (is_boolean_field_default(field)) {
-    return validate_boolean_field_default(value, field, path);
-  } else if (is_date_field_default(field)) {
-    return validate_date_field_default(value, field, path);
-  } else if (is_array_field_default(field)) {
-    return validate_array_field_default(value, field, path);
-  } else if (is_object_field_default(field)) {
-    return validate_object_field_default(value, field, path);
-  } else {
-    throw new Error(`Unknown field type: ${field.type}`);
+  const validator = validators_default[field.type];
+  if (validator) {
+    return validator(value, field, path);
   }
+  throw new Error(`No validator found for type: ${field.type}`);
 };
 var validate_schema_field_default = validateSchemaField;
 

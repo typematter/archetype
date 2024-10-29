@@ -87,9 +87,9 @@ interface ValidationResult {
 }
 
 interface ArchetypeEngine {
-    archetypeSchema: Archetype;
-    loadArchetype: (name: string) => Promise<Archetype>;
-    validateArchetype: (archetype: unknown) => ValidationResult;
+    readonly archetypeSchema: Readonly<Archetype>;
+    readonly loadArchetype: (name: string) => Promise<Archetype>;
+    readonly validateArchetype: (archetype: unknown) => ValidationResult;
 }
 
 interface BootstrapOptions {
