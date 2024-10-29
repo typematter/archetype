@@ -61,6 +61,7 @@ export type {
 	NumberField,
 	ObjectField,
 	SchemaField,
+	SchemaFieldMap,
 	StringField,
 	UnknownField
 };
