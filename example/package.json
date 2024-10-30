@@ -7,7 +7,7 @@
 		"dev": "node index.js"
 	},
 	"dependencies": {
-		"@accuser/archetype": "link:..",
+		"@typematter/archetype": "link:..",
 		"yaml": "^2.6.0"
 	}
 }
