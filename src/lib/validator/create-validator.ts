@@ -1,15 +1,17 @@
 import validateArchetype from '$lib/validation/validate-archetype.js';
-import validationError from '$lib/validation/validation-error.js';
+import validateFrontmatter from '$lib/validation/validate-frontmatter.js';
 import type { ArchetypeValidator } from '$types/archetype-validator.js';
 import type { Archetype } from '$types/archetype.js';
 import type { ValidatorOptions } from '$types/validator-options.js';
+import { DEV } from 'esm-env';
+import extendArchetype from './extend-archetype.js';
 
 /**
  * Creates and initializes an ArchetypeValidator instance.
  *
  * @param options - Configuration options for the validator.
  * @param options.store - The data store used to load archetype schemas.
- * @param options.cache - Determines whether to cache loaded archetypes. Defaults to `true`.
+ * @param options.cache - Determines whether to cache loaded archetypes. Defaults to `true` in test and production environments.
  * @param options.validation - Additional validation options to apply. Defaults to an empty object.
  * @returns A promise that resolves to an initialized ArchetypeValidator.
  *
@@ -21,9 +23,8 @@ import type { ValidatorOptions } from '$types/validator-options.js';
  * });
  */
 const createValidator: (options: ValidatorOptions) => Promise<ArchetypeValidator> = async ({
-	store,
-	cache = true,
-	validation = {}
+	cache = !DEV,
+	store
 }) => {
 	const archetypeCache = cache ? new Map<string, Archetype>() : undefined;
 
@@ -38,46 +39,43 @@ const createValidator: (options: ValidatorOptions) => Promise<ArchetypeValidator
 	const validator: ArchetypeValidator = {
 		archetypeSchema,
 
-		loadArchetype: async (name) => {
-			if (archetypeCache?.has(name)) {
+		loadArchetype: async (name, { cache } = {}) => {
+			if (cache !== false && archetypeCache?.has(name)) {
 				return archetypeCache.get(name)!;
 			}
 
 			const archetype = await store.load(name);
 
-			archetypeCache?.set(name, archetype);
-
-			return archetype;
-		},
-
-		validateArchetype: async (archetype) => {
-			return validateArchetype(archetype, archetypeSchema);
-		},
-
-		validateFrontmatter: async (frontmatter, defaultArchetypeName) => {
-			if (frontmatter === null || typeof frontmatter !== 'object') {
-				return {
-					valid: false,
-					errors: [validationError('Frontmatter must be an object')]
-				};
+			if (cache !== false) {
+				archetypeCache?.set(name, archetype);
 			}
 
-			const archetypeName =
-				'type' in frontmatter && typeof frontmatter.type === 'string'
-					? frontmatter.type
-					: defaultArchetypeName;
+			const loadedArchetypes = new Map<string, Archetype>();
 
-			if (archetypeName === undefined) {
-				return {
-					valid: false,
-					errors: [validationError('Frontmatter must have a `type` field', ['type'])]
-				};
-			}
+			const loadArchetypeRecursive = async (names: string[] = []) => {
+				for (const name of names) {
+					if (loadedArchetypes.has(name)) {
+						continue;
+					}
 
-			const archetype = await validator.loadArchetype(archetypeName);
+					const archetype = await store.load(name);
 
-			return validateArchetype(frontmatter, archetype, validation);
-		}
+					loadedArchetypes.set(name, archetype);
+
+					if (archetype.extends) {
+						await loadArchetypeRecursive(archetype.extends);
+					}
+				}
+			};
+
+			await loadArchetypeRecursive(archetype.extends);
+
+			return extendArchetype(archetype, Array.from(loadedArchetypes.values()));
+		},
+
+		validateArchetype: async (archetype) => validateArchetype(archetype, archetypeSchema),
+
+		validateFrontmatter: async (frontmatter) => validateFrontmatter(frontmatter, validator)
 	};
 
 	return validator;
