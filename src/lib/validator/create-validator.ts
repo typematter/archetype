@@ -1,4 +1,5 @@
 import validateArchetype from '$lib/validation/validate-archetype.js';
+import validationError from '$lib/validation/validation-error.js';
 import type { ArchetypeValidator } from '$types/archetype-validator.js';
 import type { Archetype } from '$types/archetype.js';
 import type { ValidatorOptions } from '$types/validator-options.js';
@@ -37,7 +38,7 @@ const createValidator: (options: ValidatorOptions) => Promise<ArchetypeValidator
 	const validator: ArchetypeValidator = {
 		archetypeSchema,
 
-		async loadArchetype(name: string) {
+		loadArchetype: async (name) => {
 			if (archetypeCache?.has(name)) {
 				return archetypeCache.get(name)!;
 			}
@@ -49,20 +50,15 @@ const createValidator: (options: ValidatorOptions) => Promise<ArchetypeValidator
 			return archetype;
 		},
 
-		validateArchetype(archetype: unknown) {
+		validateArchetype: async (archetype) => {
 			return validateArchetype(archetype, archetypeSchema);
 		},
 
-		async validateFrontmatter(frontmatter: unknown, defaultArchetypeName?: string) {
+		validateFrontmatter: async (frontmatter, defaultArchetypeName) => {
 			if (frontmatter === null || typeof frontmatter !== 'object') {
 				return {
 					valid: false,
-					errors: [
-						{
-							message: 'Frontmatter must be an object',
-							path: []
-						}
-					]
+					errors: [validationError('Frontmatter must be an object')]
 				};
 			}
 
@@ -74,12 +70,7 @@ const createValidator: (options: ValidatorOptions) => Promise<ArchetypeValidator
 			if (archetypeName === undefined) {
 				return {
 					valid: false,
-					errors: [
-						{
-							message: 'Frontmatter must have a `type` field',
-							path: ['type']
-						}
-					]
+					errors: [validationError('Frontmatter must have a `type` field', ['type'])]
 				};
 			}
 
