@@ -353,6 +353,13 @@ var validateArchetype = (archetype, archetypeSchema, { strictMode = true, allowU
 };
 var validate_archetype_default = validateArchetype;
 
+// src/lib/validation/validation-error.ts
+var validationError = (message, path = []) => ({
+  message,
+  path
+});
+var validation_error_default = validationError;
+
 // src/lib/validator/create-validator.ts
 var createValidator = async ({
   store,
@@ -367,7 +374,7 @@ var createValidator = async ({
   }
   const validator = {
     archetypeSchema,
-    async loadArchetype(name) {
+    loadArchetype: async (name) => {
       if (archetypeCache?.has(name)) {
         return archetypeCache.get(name);
       }
@@ -375,31 +382,21 @@ var createValidator = async ({
       archetypeCache?.set(name, archetype);
       return archetype;
     },
-    validateArchetype(archetype) {
+    validateArchetype: async (archetype) => {
       return validate_archetype_default(archetype, archetypeSchema);
     },
-    async validateFrontmatter(frontmatter, defaultArchetypeName) {
+    validateFrontmatter: async (frontmatter, defaultArchetypeName) => {
       if (frontmatter === null || typeof frontmatter !== "object") {
         return {
           valid: false,
-          errors: [
-            {
-              message: "Frontmatter must be an object",
-              path: []
-            }
-          ]
+          errors: [validation_error_default("Frontmatter must be an object")]
         };
       }
       const archetypeName = "type" in frontmatter && typeof frontmatter.type === "string" ? frontmatter.type : defaultArchetypeName;
       if (archetypeName === void 0) {
         return {
           valid: false,
-          errors: [
-            {
-              message: "Frontmatter must have a `type` field",
-              path: ["type"]
-            }
-          ]
+          errors: [validation_error_default("Frontmatter must have a `type` field", ["type"])]
         };
       }
       const archetype = await validator.loadArchetype(archetypeName);

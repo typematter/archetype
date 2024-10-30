@@ -144,7 +144,7 @@ interface ArchetypeValidator {
     /**
      * Validate an archetype definition against the base archetype schema
      */
-    readonly validateArchetype: (archetype: unknown) => ValidationResult;
+    readonly validateArchetype: (archetype: unknown) => Promise<ValidationResult>;
     /**
      * Validate frontmatter against a named archetype
      */
