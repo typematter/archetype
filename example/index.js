@@ -1,10 +1,7 @@
-import { bootstrap } from '@accuser/archetype';
+import { createLocalStore, createValidator } from '@accuser/archetype';
+import { join } from 'node:path';
+import { cwd } from 'node:process';
 
-const engine = await bootstrap();
-const post = await engine.loadArchetype('post');
-
-console.dir(post, { depth: null });
-
-const { errors, valid } = engine.validateArchetype(post);
-
-console.log(errors, valid);
+const validator = await createValidator({
+	store: createLocalStore(join(cwd(), 'data', 'archetypes'))
+});

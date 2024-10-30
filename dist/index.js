@@ -1,20 +1,71 @@
-import { join } from 'node:path';
-import { cwd } from 'node:process';
 import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { parse } from 'yaml';
 
 // Generated with esbuild
 
-var loadArchetype = async (name, path) => {
-  const filename = join(path, `${name}.md`);
-  const text = await readFile(filename, "utf-8");
-  const [, yaml] = text.split("---\n");
+// src/types/archetype-store.ts
+var ArchetypeLoadError = class extends Error {
+  constructor(message, cause) {
+    super(message);
+    this.name = "ArchetypeLoadError";
+    this.cause = cause;
+  }
+};
+var archetypeFromYaml = (yaml) => parse(yaml);
+var archetype_from_yaml_default = archetypeFromYaml;
+
+// src/lib/store/yaml-from-markdown.ts
+var yamlFromMarkdown = (markdown) => {
+  const [, yaml] = markdown.split("---\n");
   if (yaml) {
-    return parse(yaml);
+    return yaml;
   }
   throw new Error("YAML content is missing in the file");
 };
-var load_archetype_default = loadArchetype;
+var yaml_from_markdown_default = yamlFromMarkdown;
+
+// src/lib/store/create-local-store.ts
+var LocalArchetypeLoadError = class extends ArchetypeLoadError {
+  constructor(name, originalError) {
+    super(`Failed to load local archetype "${name}": ${originalError.message}`);
+    this.name = "LocalArchetypeLoadError";
+    this.stack = originalError.stack;
+  }
+};
+var loadMarkdown = (name, path) => readFile(join(path, `${name}.md`), "utf-8").catch((error) => {
+  throw new LocalArchetypeLoadError(
+    name,
+    error instanceof Error ? error : new Error(String(error))
+  );
+});
+var createLocalStore = (root) => ({
+  load: (name) => loadMarkdown(name, root).then(yaml_from_markdown_default).then(archetype_from_yaml_default)
+});
+
+// src/lib/store/create-remote-store.ts
+var RemoteArchetypeLoadError = class extends ArchetypeLoadError {
+  constructor(name, statusText) {
+    super(`Failed to load remote archetype "${name}": ${statusText}`);
+    this.name = "RemoteArchetypeLoadError";
+  }
+};
+var fetchMarkdown = async (name, baseUrl) => {
+  try {
+    const url = new URL(`${name}.md`, baseUrl);
+    const res = await fetch(url);
+    if (res.ok) {
+      return res.text();
+    } else {
+      throw new RemoteArchetypeLoadError(name, res.statusText);
+    }
+  } catch (error) {
+    throw error instanceof RemoteArchetypeLoadError ? error : new ArchetypeLoadError(name, error);
+  }
+};
+var createRemoteStore = (baseUrl) => ({
+  load: (name) => fetchMarkdown(name, baseUrl).then(yaml_from_markdown_default).then(archetype_from_yaml_default)
+});
 
 // src/lib/validation/validate-array-field.ts
 var validateArrayField = (value, field, path = []) => {
@@ -61,7 +112,7 @@ var validateBooleanField = (value, field, path = []) => {
 };
 var validate_boolean_field_default = validateBooleanField;
 
-// src/lib/validation/iso8601.ts
+// src/lib/validation/date-format/iso8601.ts
 var ISO8601_FORMATS = {
   CALENDAR: /^(\d{4})-([01]\d)-([0-3]\d)(?:T([012]\d):([0-5]\d):([0-5]\d)(?:\.(\d+))?(Z|([+-])([01]\d):([0-5]\d))?)?$/,
   ORDINAL: /^(\d{4})-(\d{3})$/,
@@ -276,7 +327,7 @@ var validateSchemaField = (value, field, path = []) => {
 var validate_schema_field_default = validateSchemaField;
 
 // src/lib/validation/validate-archetype.ts
-var validateArchetype = (archetype, archetypeSchema) => {
+var validateArchetype = (archetype, archetypeSchema, { strictMode = true, allowUnknownFields = false } = {}) => {
   const errors = [];
   for (const [fieldName, fieldSchema] of Object.entries(archetypeSchema.schema.required)) {
     const value = archetype && typeof archetype === "object" ? archetype[fieldName] : void 0;
@@ -302,23 +353,40 @@ var validateArchetype = (archetype, archetypeSchema) => {
 };
 var validate_archetype_default = validateArchetype;
 
-// src/lib/bootstrap.ts
-var bootstrap = async ({
-  root = join(cwd(), "data", "archetypes")
-} = {}) => {
-  const archetypeSchema = await load_archetype_default("archetype", root.toString());
+// src/lib/validator/create-validator.ts
+var createValidator = async ({
+  store,
+  cache = true,
+  validation = {}
+}) => {
+  const archetypeCache = cache ? /* @__PURE__ */ new Map() : void 0;
+  const archetypeSchema = await store.load("archetype");
   const { errors, valid } = validate_archetype_default(archetypeSchema, archetypeSchema);
-  if (errors.length === 0 && valid) {
-    return {
-      archetypeSchema,
-      loadArchetype: (name) => load_archetype_default(name, root.toString()),
-      validateArchetype: (archetype) => validate_archetype_default(archetype, archetypeSchema)
-    };
+  if (!valid) {
+    throw new Error("Invalid archetype schema", { cause: errors });
   }
-  throw new Error("Invalid archetype schema", { cause: errors });
+  const validator = {
+    archetypeSchema,
+    async loadArchetype(name) {
+      if (archetypeCache?.has(name)) {
+        return archetypeCache.get(name);
+      }
+      const archetype = await store.load(name);
+      archetypeCache?.set(name, archetype);
+      return archetype;
+    },
+    validateArchetype(archetype) {
+      return validate_archetype_default(archetype, archetypeSchema);
+    },
+    async validateFrontmatter(frontmatter, archetypeName) {
+      const archetype = await validator.loadArchetype(archetypeName);
+      return validate_archetype_default(frontmatter, archetype, validation);
+    }
+  };
+  return validator;
 };
-var bootstrap_default = bootstrap;
+var create_validator_default = createValidator;
 
-export { bootstrap_default as bootstrap };
+export { ArchetypeLoadError, LocalArchetypeLoadError, RemoteArchetypeLoadError, createLocalStore, createRemoteStore, create_validator_default as createValidator };
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map

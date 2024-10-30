@@ -10,13 +10,13 @@ importers:
     dependencies:
       '@accuser/archetype':
         specifier: github:accuser/archetype
-        version: https://codeload.github.com/accuser/archetype/tar.gz/0a28d7d43697c040050778af284494a46200af82
+        version: https://codeload.github.com/accuser/archetype/tar.gz/838aef204bae408e37c6143bf74836dcbb5209c8
 
 packages:
 
-  '@accuser/archetype@https://codeload.github.com/accuser/archetype/tar.gz/0a28d7d43697c040050778af284494a46200af82':
-    resolution: {tarball: https://codeload.github.com/accuser/archetype/tar.gz/0a28d7d43697c040050778af284494a46200af82}
-    version: 0.0.1-next.3
+  '@accuser/archetype@https://codeload.github.com/accuser/archetype/tar.gz/838aef204bae408e37c6143bf74836dcbb5209c8':
+    resolution: {tarball: https://codeload.github.com/accuser/archetype/tar.gz/838aef204bae408e37c6143bf74836dcbb5209c8}
+    version: 0.0.1-next.4
 
   yaml@2.6.0:
     resolution: {integrity: sha512-a6ae//JvKDEra2kdi1qzCyrJW/WZCgFi8ydDV+eXExl95t+5R+ijnqHJbz9tmMh8FUjx3iv2fCQ4dclAQlO2UQ==}
@@ -25,7 +25,7 @@ packages:
 
 snapshots:
 
-  '@accuser/archetype@https://codeload.github.com/accuser/archetype/tar.gz/0a28d7d43697c040050778af284494a46200af82':
+  '@accuser/archetype@https://codeload.github.com/accuser/archetype/tar.gz/838aef204bae408e37c6143bf74836dcbb5209c8':
     dependencies:
       yaml: 2.6.0
 
