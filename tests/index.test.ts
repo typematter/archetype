@@ -81,7 +81,7 @@ describe('createValidator', () => {
 		it('should validate a valid archetype', async () => {
 			const { validateArchetype } = await createValidator({ store });
 
-			const result = validateArchetype(mockPostArchetype);
+			const result = await validateArchetype(mockPostArchetype);
 
 			expect(result.valid).toBe(true);
 			expect(result.errors).toHaveLength(0);
