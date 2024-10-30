@@ -53,8 +53,38 @@ const createValidator: (options: ValidatorOptions) => Promise<ArchetypeValidator
 			return validateArchetype(archetype, archetypeSchema);
 		},
 
-		async validateFrontmatter(frontmatter: unknown, archetypeName: string) {
+		async validateFrontmatter(frontmatter: unknown, defaultArchetypeName?: string) {
+			if (frontmatter === null || typeof frontmatter !== 'object') {
+				return {
+					valid: false,
+					errors: [
+						{
+							message: 'Frontmatter must be an object',
+							path: []
+						}
+					]
+				};
+			}
+
+			const archetypeName =
+				'type' in frontmatter && typeof frontmatter.type === 'string'
+					? frontmatter.type
+					: defaultArchetypeName;
+
+			if (archetypeName === undefined) {
+				return {
+					valid: false,
+					errors: [
+						{
+							message: 'Frontmatter must have a `type` field',
+							path: ['type']
+						}
+					]
+				};
+			}
+
 			const archetype = await validator.loadArchetype(archetypeName);
+
 			return validateArchetype(frontmatter, archetype, validation);
 		}
 	};

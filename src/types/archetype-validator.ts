@@ -22,7 +22,7 @@ interface ArchetypeValidator {
 	 */
 	readonly validateFrontmatter: (
 		frontmatter: unknown,
-		archetypeName: string
+		defaultArchetypeName?: string
 	) => Promise<ValidationResult>;
 }
 
