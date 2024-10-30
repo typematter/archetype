@@ -1,5 +1,5 @@
 {
-	"name": "@accuser/archetype",
+	"name": "@typematter/archetype",
 	"version": "0.0.1-next.7",
 	"description": "Archetype system for validating frontmatter.",
 	"private": false,
@@ -30,6 +30,7 @@
 	"keywords": [
 		"archetype",
 		"frontmatter",
+		"markdown",
 		"typescript"
 	],
 	"author": {
