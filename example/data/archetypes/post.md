@@ -1,5 +1,5 @@
 ---
-name: contact
+name: post
 version: '1.0.0'
 schema:
   required:
