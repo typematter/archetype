@@ -1,3 +1,5 @@
+[![Node.js Package](https://github.com/accuser/archetype/actions/workflows/release-package.yml/badge.svg)](https://github.com/accuser/archetype/actions/workflows/release-package.yml)
+
 # Archetype
 
 Archetype is a robust TypeScript library designed to define, load, and manage content schemas through archetypes. It supports both local and remote schema sources, ensuring flexibility and scalability for your content systems.
