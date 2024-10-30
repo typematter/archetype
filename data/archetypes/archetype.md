@@ -21,15 +21,14 @@ schema:
         optional:
           type: Object
           description: Fields that may be present in content using this archetype
-      required: [required, optional]
   optional:
     extends:
       type: Array
       description: List of archetypes to extend
-	  items:
-		type: String
-		pattern: ^[a-z][a-z0-9-]*$
-		description: Name of archetype to extend
+      items:
+        type: String
+        pattern: ^[a-z][a-z0-9-]*$
+        description: Name of archetype to extend
 ---
 
 # Archetype Definition Type
