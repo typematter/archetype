@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parse } from 'yaml';
+import { DEV } from 'esm-env';
 
 // Generated with esbuild
 
@@ -327,7 +328,7 @@ var validateSchemaField = (value, field, path = []) => {
 var validate_schema_field_default = validateSchemaField;
 
 // src/lib/validation/validate-archetype.ts
-var validateArchetype = (archetype, archetypeSchema, { strictMode = true, allowUnknownFields = false } = {}) => {
+var validateArchetype = (archetype, archetypeSchema) => {
   const errors = [];
   for (const [fieldName, fieldSchema] of Object.entries(archetypeSchema.schema.required)) {
     const value = archetype && typeof archetype === "object" ? archetype[fieldName] : void 0;
@@ -360,11 +361,43 @@ var validationError = (message, path = []) => ({
 });
 var validation_error_default = validationError;
 
+// src/lib/validation/validate-frontmatter.ts
+var validateFrontmatter = async (frontmatter, { loadArchetype }) => {
+  if (frontmatter === null || typeof frontmatter !== "object") {
+    return {
+      valid: false,
+      errors: [validation_error_default("Frontmatter must be an object")]
+    };
+  }
+  const archetypeName = "type" in frontmatter && typeof frontmatter.type === "string" ? frontmatter.type : void 0;
+  if (archetypeName === void 0) {
+    return {
+      valid: false,
+      errors: [validation_error_default("Frontmatter must have a `type` field", ["type"])]
+    };
+  }
+  const archetype = await loadArchetype(archetypeName);
+  return validate_archetype_default(frontmatter, archetype);
+};
+var validate_frontmatter_default = validateFrontmatter;
+
+// src/lib/validator/extend-archetype.ts
+var extendArchetype = (archetype, extensions) => extensions.reduce(
+  (prev, { schema: { required, optional } }) => ({
+    ...prev,
+    schema: {
+      required: { ...prev.schema.required, ...required },
+      optional: { ...prev.schema.optional, ...optional }
+    }
+  }),
+  archetype
+);
+var extend_archetype_default = extendArchetype;
+
 // src/lib/validator/create-validator.ts
 var createValidator = async ({
-  store,
-  cache = true,
-  validation = {}
+  cache = !DEV,
+  store
 }) => {
   const archetypeCache = cache ? /* @__PURE__ */ new Map() : void 0;
   const archetypeSchema = await store.load("archetype");
@@ -374,34 +407,32 @@ var createValidator = async ({
   }
   const validator = {
     archetypeSchema,
-    loadArchetype: async (name) => {
-      if (archetypeCache?.has(name)) {
+    loadArchetype: async (name, { cache: cache2 } = {}) => {
+      if (cache2 !== false && archetypeCache?.has(name)) {
         return archetypeCache.get(name);
       }
       const archetype = await store.load(name);
-      archetypeCache?.set(name, archetype);
-      return archetype;
-    },
-    validateArchetype: async (archetype) => {
-      return validate_archetype_default(archetype, archetypeSchema);
-    },
-    validateFrontmatter: async (frontmatter, defaultArchetypeName) => {
-      if (frontmatter === null || typeof frontmatter !== "object") {
-        return {
-          valid: false,
-          errors: [validation_error_default("Frontmatter must be an object")]
-        };
+      if (cache2 !== false) {
+        archetypeCache?.set(name, archetype);
       }
-      const archetypeName = "type" in frontmatter && typeof frontmatter.type === "string" ? frontmatter.type : defaultArchetypeName;
-      if (archetypeName === void 0) {
-        return {
-          valid: false,
-          errors: [validation_error_default("Frontmatter must have a `type` field", ["type"])]
-        };
-      }
-      const archetype = await validator.loadArchetype(archetypeName);
-      return validate_archetype_default(frontmatter, archetype, validation);
-    }
+      const loadedArchetypes = /* @__PURE__ */ new Map();
+      const loadArchetypeRecursive = async (names = []) => {
+        for (const name2 of names) {
+          if (loadedArchetypes.has(name2)) {
+            continue;
+          }
+          const archetype2 = await store.load(name2);
+          loadedArchetypes.set(name2, archetype2);
+          if (archetype2.extends) {
+            await loadArchetypeRecursive(archetype2.extends);
+          }
+        }
+      };
+      await loadArchetypeRecursive(archetype.extends);
+      return extend_archetype_default(archetype, Array.from(loadedArchetypes.values()));
+    },
+    validateArchetype: async (archetype) => validate_archetype_default(archetype, archetypeSchema),
+    validateFrontmatter: async (frontmatter) => validate_frontmatter_default(frontmatter, validator)
   };
   return validator;
 };

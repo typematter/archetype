@@ -69,9 +69,9 @@ interface Archetype {
         optional: Record<string, SchemaField>;
     };
     /**
-     * Name of parent archetype to inherit from.
+     * Name(s) of archetype(s) this archetype extends.
      */
-    extends?: string;
+    extends?: string[];
 }
 
 declare class ArchetypeLoadError extends Error {
@@ -132,6 +132,13 @@ interface ValidationResult {
     errors: ValidationError[];
 }
 
+interface LoadOptions {
+    /**
+     * Override the cache setting for this load. If not provided, the default
+     * cache setting will be used.
+     */
+    cache?: false;
+}
 interface ArchetypeValidator {
     /**
      * The base archetype schema that all other archetypes must conform to
@@ -140,15 +147,15 @@ interface ArchetypeValidator {
     /**
      * Load an archetype by name from the configured store
      */
-    readonly loadArchetype: (name: string) => Promise<Archetype>;
+    readonly loadArchetype: (name: string, options?: LoadOptions) => Promise<Archetype>;
     /**
      * Validate an archetype definition against the base archetype schema
      */
     readonly validateArchetype: (archetype: unknown) => Promise<ValidationResult>;
     /**
-     * Validate frontmatter against a named archetype
+     * Validate frontmatter
      */
-    readonly validateFrontmatter: (frontmatter: unknown, defaultArchetypeName?: string) => Promise<ValidationResult>;
+    readonly validateFrontmatter: (frontmatter: unknown) => Promise<ValidationResult>;
 }
 
 interface ValidatorOptions {
@@ -174,7 +181,7 @@ interface ValidatorOptions {
  *
  * @param options - Configuration options for the validator.
  * @param options.store - The data store used to load archetype schemas.
- * @param options.cache - Determines whether to cache loaded archetypes. Defaults to `true`.
+ * @param options.cache - Determines whether to cache loaded archetypes. Defaults to `true` in test and production environments.
  * @param options.validation - Additional validation options to apply. Defaults to an empty object.
  * @returns A promise that resolves to an initialized ArchetypeValidator.
  *
