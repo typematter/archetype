@@ -24,9 +24,12 @@ schema:
       required: [required, optional]
   optional:
     extends:
-      type: String
-      description: Name of parent archetype to inherit from
-      pattern: ^[a-z][a-z0-9-]*$
+      type: Array
+      description: List of archetypes to extend
+	  items:
+		type: String
+		pattern: ^[a-z][a-z0-9-]*$
+		description: Name of archetype to extend
 ---
 
 # Archetype Definition Type
@@ -37,7 +40,7 @@ This archetype defines the structure and validation rules for other archetypes i
 
 ### Self-Validation
 
-The archetype archetype validates itself as well as other archetypes. This creates a consistent type system where everything, including type definitions, follows the same patterns and rules.
+The archetype `archetype` validates itself as well as other archetypes. This creates a consistent type system where everything, including type definitions, follows the same patterns and rules.
 
 ### Schema Structure
 
@@ -55,7 +58,7 @@ Each field in either section must specify:
 
 ### Required Fields
 
-#### name
+#### `name`
 
 The unique identifier for the archetype. This name is used when:
 
@@ -75,7 +78,7 @@ Requirements:
 - Can contain lowercase letters, numbers, and hyphens
 - Must be unique across all archetypes
 
-#### version
+#### `version`
 
 Semantic version number for the archetype. Used to:
 
@@ -95,7 +98,7 @@ Requirements:
 - Major version changes indicate breaking changes
 - Minor version changes indicate backwards-compatible additions
 
-#### schema
+#### `schema`
 
 The core schema definition that describes the structure of content using this archetype. Must contain both `required` and `optional` sections.
 
@@ -121,19 +124,19 @@ Requirements:
 
 ### Optional Fields
 
-#### extends
+#### `extends`
 
-Name of the parent archetype to inherit from. When specified:
+Name(s) of the archetype(s) to extend. When specified:
 
-- All required fields from parent must be included
-- Parent optional fields are automatically available
-- Fields can be moved from optional to required
-- Field types must be compatible with parent
+- All required fields from the extended archetype(s) must be included
+- Optional fields from the extended archetype(s) are automatically available
+- Fields can be moved from `optional` to `required`
+- Field types must be compatible with those of the extended archetype(s)
 
 Example:
 
 ```yaml
-extends: base
+extends: [base]
 ```
 
 ## Schema Types
@@ -178,7 +181,7 @@ schema:
 ---
 name: advanced
 version: 1.0
-extends: base
+extends: [base]
 schema:
   required:
     category:

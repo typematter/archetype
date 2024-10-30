@@ -27,9 +27,9 @@ interface Archetype {
 	};
 
 	/**
-	 * Name of parent archetype to inherit from.
+	 * Name(s) of archetype(s) this archetype extends.
 	 */
-	extends?: string;
+	extends?: string[];
 }
 
 export type { Archetype };
