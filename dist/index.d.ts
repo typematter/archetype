@@ -148,7 +148,7 @@ interface ArchetypeValidator {
     /**
      * Validate frontmatter against a named archetype
      */
-    readonly validateFrontmatter: (frontmatter: unknown, archetypeName: string) => Promise<ValidationResult>;
+    readonly validateFrontmatter: (frontmatter: unknown, defaultArchetypeName?: string) => Promise<ValidationResult>;
 }
 
 interface ValidatorOptions {
