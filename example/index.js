@@ -1,4 +1,4 @@
-import { createLocalStore, createValidator } from '@accuser/archetype';
+import { createLocalStore, createValidator } from '@typematter/archetype';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { cwd } from 'node:process';

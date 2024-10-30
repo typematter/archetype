@@ -36,18 +36,18 @@
 	"author": {
 		"email": "mhgibbons@me.com",
 		"name": "Matthew Gibbons",
-		"url": "https://github.com/accuser"
+		"url": "https://github.com/typematter"
 	},
 	"license": "MIT",
 	"publishConfig": {
-		"@accuser:registry": "https://npm.pkg.github.com"
+		"@typematter:registry": "https://npm.pkg.github.com"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/accuser/archetype.git"
+		"url": "https://github.com/typematter/archetype.git"
 	},
 	"bugs": {
-		"url": "https://github.com/accuser/archetype/issues"
+		"url": "https://github.com/typematter/archetype/issues"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.13.0",

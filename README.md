@@ -38,7 +38,7 @@ npm install archetype
 ### Creating a local store
 
 ```typescript
-import { createLocalStore } from '@accuser/archetype';
+import { createLocalStore } from '@typematter/archetype';
 
 const localStore = createLocalStore('/path/to/archetypes');
 
@@ -55,7 +55,7 @@ await localStore
 ### Creating a remote store
 
 ```typescript
-import { createRemoteStore } from '@accuser/archetype';
+import { createRemoteStore } from '@typematter/archetype';
 
 const remoteStore = createRemoteStore('https://example.com/archetypes');
 
@@ -72,7 +72,7 @@ await remoteStore
 ### Loading an archetype
 
 ```typescript
-import { createValidator } from '@accuser/archetype';
+import { createValidator } from '@typematter/archetype';
 
 const validator = createValidator({
 	store: localStore
