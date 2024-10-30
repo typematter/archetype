@@ -25,11 +25,11 @@ schema:
   optional:
     extends:
       type: Array
-      description: List of parent archetypes to extend
+      description: List of archetypes to extend
 	  items:
 		type: String
 		pattern: ^[a-z][a-z0-9-]*$
-		description: Name of parent archetype to extend
+		description: Name of archetype to extend
 ---
 
 # Archetype Definition Type
@@ -126,7 +126,7 @@ Requirements:
 
 #### `extends`
 
-Name of the archetype(s) to extend. When specified:
+Name(s) of the archetype(s) to extend. When specified:
 
 - All required fields from the extended archetype(s) must be included
 - Optional fields from the extended archetype(s) are automatically available
