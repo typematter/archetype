@@ -1,4 +1,4 @@
-[![Node.js Package](https://github.com/accuser/archetype/actions/workflows/release-package.yml/badge.svg)](https://github.com/accuser/archetype/actions/workflows/release-package.yml)
+[![Node.js Package](https://github.com/typematter/archetype/actions/workflows/release-package.yml/badge.svg)](https://github.com/typematter/archetype/actions/workflows/release-package.yml)
 
 # Archetype
 
