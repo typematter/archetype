@@ -8,7 +8,7 @@ export default defineConfig({
 	clean: true,
 	dts: true,
 	entryPoints: ['src/index.ts'],
-	external: ['yaml'],
+	external: ['esm-env', 'yaml'],
 	format: 'esm',
 	outdir: 'dist',
 	platform: 'node',
