@@ -1,29 +1,43 @@
 import { ArchetypeStore, createValidator } from '@accuser/archetype';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-const mockSchema = {
+const mockArchetype = {
 	name: 'archetype',
 	version: '1.0.0',
 	schema: {
 		required: {
-			name: { type: 'String' },
-			version: { type: 'String' },
+			name: { type: 'String' as const },
+			version: { type: 'String' as const },
 			schema: {
-				type: 'Object',
+				type: 'Object' as const,
 				properties: {
-					required: { type: 'Object' },
-					optional: { type: 'Object' }
+					required: { type: 'Object' as const },
+					optional: { type: 'Object' as const }
 				}
 			}
 		},
 		optional: {
-			extends: { type: 'String' }
+			extends: { type: 'String' as const }
+		}
+	}
+};
+
+const mockPostArchetype = {
+	name: 'post',
+	version: '1.0.0',
+	schema: {
+		required: {
+			title: { type: 'String' as const }
+		},
+		optional: {
+			author: { type: 'String' as const }
 		}
 	}
 };
 
 const store: ArchetypeStore = {
-	load: vi.fn().mockResolvedValue(mockSchema)
+	load: (name) =>
+		name === 'archetype' ? Promise.resolve(mockArchetype) : Promise.resolve(mockPostArchetype)
 };
 
 describe('createValidator', () => {
@@ -37,7 +51,7 @@ describe('createValidator', () => {
 		it('should be loaded automatically', async () => {
 			const { archetypeSchema } = await createValidator({ store });
 
-			expect(archetypeSchema).toBe(mockSchema);
+			expect(archetypeSchema).toBe(mockArchetype);
 		});
 	});
 
@@ -67,22 +81,31 @@ describe('createValidator', () => {
 		it('should validate a valid archetype', async () => {
 			const { validateArchetype } = await createValidator({ store });
 
-			const person = {
-				name: 'person',
-				version: '1.0.0',
-				schema: {
-					required: {
-						name: { type: 'String' },
-						age: { type: 'Number' }
-					},
-					optional: {
-						email: { type: 'String' }
-					}
-				}
+			const result = validateArchetype(mockPostArchetype);
+
+			expect(result.valid).toBe(true);
+			expect(result.errors).toHaveLength(0);
+		});
+	});
+
+	it('should return an object with a function to validate frontmatter', async () => {
+		const { validateFrontmatter } = await createValidator({ store });
+
+		expect(validateFrontmatter).toBeDefined();
+	});
+
+	describe('validateFrontmatter', () => {
+		it('should validate a valid frontmatter', async () => {
+			const { validateFrontmatter } = await createValidator({ store });
+
+			const frontmatter = {
+				type: 'post',
+				title: 'First Post'
 			};
 
-			const result = validateArchetype(person);
+			const result = await validateFrontmatter(frontmatter);
 
+			console.dir(result, { depth: null });
 			expect(result.valid).toBe(true);
 			expect(result.errors).toHaveLength(0);
 		});
