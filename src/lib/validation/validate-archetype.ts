@@ -1,11 +1,23 @@
 import type { Archetype } from '$types/archetype.js';
 import type { SchemaField } from '$types/schema-field.js';
 import type { ValidationResult } from '$types/validation-result.js';
+import type { ValidatorOptions } from '$types/validator-options.js';
 import type { ValidationError } from 'src/types/validation-error.js';
 import validateSchemaField from './validate-schema-field.js';
 
-const validateArchetype = (archetype: unknown, archetypeSchema: Archetype): ValidationResult => {
+const validateArchetype: (
+	archetype: unknown,
+	archetypeSchema: Archetype,
+	options?: ValidatorOptions['validation']
+) => ValidationResult = (
+	archetype,
+	archetypeSchema,
+	{ strictMode = true, allowUnknownFields = false } = {}
+) => {
 	const errors: ValidationError[] = [];
+
+	void strictMode;
+	void allowUnknownFields;
 
 	for (const [fieldName, fieldSchema] of Object.entries(archetypeSchema.schema.required) as [
 		string,
