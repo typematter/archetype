@@ -1,0 +1,7 @@
+{
+	"editor.detectIndentation": false,
+	"[markdown]": {
+		"editor.insertSpaces": true,
+		"editor.tabSize": 2
+	}
+}
