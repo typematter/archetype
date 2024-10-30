@@ -1,219 +1,247 @@
----
-name: archetype
-version: 1.0.0
-schema:
-  required:
-    name:
-      type: String
-      description: Unique identifier for this archetype
-      pattern: ^[a-z][a-z0-9-]*$
-    version:
-      type: String
-      description: Semantic version number
-      pattern: ^\d+\.\d+(\.\d+)?$
-    schema:
-      type: Object
-      description: Schema definition containing required and optional field specifications
-      properties:
-        required:
-          type: Object
-          description: Fields that must be present in content using this archetype
-        optional:
-          type: Object
-          description: Fields that may be present in content using this archetype
-      required: [required, optional]
-  optional:
-    extends:
-      type: String
-      description: Name of parent archetype to inherit from
-      pattern: ^[a-z][a-z0-9-]*$
----
+# Archetype
 
-# Archetype Definition Type
+Archetype is a robust TypeScript library designed to define, load, and manage content schemas through archetypes. It supports both local and remote schema sources, ensuring flexibility and scalability for your content systems.
 
-This archetype defines the structure and validation rules for other archetypes in the content system. It serves as both a schema for validating archetypes and a template for creating new ones.
+## Table of contents
 
-## Core Concepts
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Creating a local store](#creating-a-local-store)
+  - [Creating a remote store](#creating-a-remote-store)
+  - [Loading an archetype](#loading-an-archetype)
+  - [Validating an archetype](#validating-an-archetype)
+  - [Validating frontmatter](#validating-frontmatter)
+- [API documentation](#api-documentation)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
-### Self-Validation
+## Features
 
-The archetype archetype validates itself as well as other archetypes. This creates a consistent type system where everything, including type definitions, follows the same patterns and rules.
+- **Flexible Schema Loading**: Supports loading archetype schemas from both local markdown files and remote URLs.
+- **Robust Error Handling**: Custom error classes provide clear and specific error messages.
+- **Type-Safe**: Built with TypeScript to ensure type safety across your project.
+- **Extensible Architecture**: Easily extend or modify to fit your project's needs.
+- **Self-Validation**: Archetypes can validate themselves and others, maintaining consistency.
 
-### Schema Structure
+## Installation
 
-Each archetype must define its schema with two main sections:
-
-1. `required` - Fields that must be present
-2. `optional` - Fields that may be present
-
-Each field in either section must specify:
-
-- `type` - The data type of the field
-- `description` - Clear documentation of the field's purpose and usage
-
-## Field Definitions
-
-### Required Fields
-
-#### name
-
-The unique identifier for the archetype. This name is used when:
-
-- Referencing the archetype in content
-- Specifying extensions
-- Generating documentation
-
-Example:
-
-```yaml
-name: tutorial
+```bash
+npm install archetype
 ```
 
-Requirements:
+## Usage
 
-- Must start with a lowercase letter
-- Can contain lowercase letters, numbers, and hyphens
-- Must be unique across all archetypes
+### Creating a local store
 
-#### version
+```typescript
+import { createLocalStore } from '@accuser/archetype';
 
-Semantic version number for the archetype. Used to:
+const localStore = createLocalStore('/path/to/archetypes');
 
-- Track schema evolution
-- Manage compatibility
-- Document changes
-
-Example:
-
-```yaml
-version: 1.0.0
+await localStore
+	.load('post')
+	.then((archetype) => {
+		console.log('Loaded archetype:', archetype);
+	})
+	.catch((error) => {
+		console.error(error);
+	});
 ```
 
-Requirements:
+### Creating a remote store
 
-- Must follow semantic versioning (MAJOR.MINOR.PATCH)
-- Major version changes indicate breaking changes
-- Minor version changes indicate backwards-compatible additions
+```typescript
+import { createRemoteStore } from '@accuser/archetype';
 
-#### schema
+const remoteStore = createRemoteStore('https://example.com/archetypes');
 
-The core schema definition that describes the structure of content using this archetype. Must contain both `required` and `optional` sections.
-
-Example:
-
-```yaml
-schema:
-  required:
-    title:
-      type: String
-      description: Page title
-  optional:
-    description:
-      type: String
-      description: Brief summary
+await remoteStore
+	.load('post')
+	.then((archetype) => {
+		console.log('Loaded archetype:', archetype);
+	})
+	.catch((error) => {
+		console.error(error);
+	});
 ```
 
-Requirements:
+### Loading an archetype
 
-- Must have both `required` and `optional` sections
-- Each field must specify type and description
-- Types must be valid schema types
+```typescript
+import { createValidator } from '@accuser/archetype';
 
-### Optional Fields
+const validator = createValidator({
+	store: localStore
+});
 
-#### extends
-
-Name of the parent archetype to inherit from. When specified:
-
-- All required fields from parent must be included
-- Parent optional fields are automatically available
-- Fields can be moved from optional to required
-- Field types must be compatible with parent
-
-Example:
-
-```yaml
-extends: base
+const postArchetype = await validator.loadArchetype('post');
 ```
 
-## Schema Types
+### Validating an archetype
 
-Valid types for schema fields:
-
-- `String` - Text values
-- `Number` - Numeric values
-- `Boolean` - True/false values
-- `Array` - List of values
-- `Object` - Nested structure
-- `Date` - ISO 8601 date/time
-
-Additional type constraints can be specified:
-
-- `pattern` - Regex pattern for strings
-- `enum` - List of valid values
-- `min`/`max` - Numeric bounds
-- `items` - Schema for array items
-- `properties` - Schema for object properties
-
-## Usage Examples
-
-### Minimal Archetype
-
-```yaml
----
-name: simple
-version: 1.0
-schema:
-  required:
-    title:
-      type: String
-      description: Page title
-  optional: {}
----
+```typescript
+const validationResult = await validator.validateArchetype(postArchetype);
 ```
 
-### Extended Archetype
+### Validating frontmatter
 
-```yaml
----
-name: advanced
-version: 1.0
-extends: base
-schema:
-  required:
-    category:
-      type: String
-      enum: [guide, reference, tutorial]
-      description: Content category
-  optional:
-    tags:
-      type: Array
-      items:
-        type: String
-      description: Content tags
----
+```typescript
+const frontmatter = {
+	title: 'Hello, World!',
+	date: '2021-01-01'
+};
+
+const validationResult = await validator.validateFrontmatter(frontmatter, 'post');
 ```
 
-## Build Process Integration
+## API documentation
 
-This archetype is used during the build process to:
+### Interfaces
 
-1. Validate archetype definitions
-2. Ensure consistent schema structure
-3. Verify extension relationships
-4. Generate archetype documentation
+#### `Archetype`
 
-The validation process:
+```typescript
+interface Archetype {
+	name: string;
+	version: string;
+	schema: {
+		required: Record<string, SchemaField>;
+		optional: Record<string, SchemaField>;
+	};
+	extends?: string[];
+}
+```
 
-1. Bootstrap validation of this archetype
-2. Validate base archetype
-3. Validate all other archetypes
-4. Generate final schema registry
+- `name`: The name of the archetype.
+- `version`: The version of the archetype.
+- `schema`: The schema fields.
+- `extends`: The name(s) of the archetype(s) this archetype extends.
 
-## Best Practices
+#### `ArchetypeStore`
 
-1. Keep schemas focused and minimal
-2. Document fields thoroughly
-3. Use semantic versioning
-4. Plan for evolution
-5. Consider extension hierarchy carefully
+```typescript
+interface ArchetypeStore {
+	load(name: string): Promise<Archetype>;
+}
+```
+
+- `load`: Loads an archetype schema by name.
+
+#### `ArchetypeValidator`
+
+```typescript
+interface ArchetypeValidator {
+	readonly archetypeSchema: Readonly<Archetype>;
+	loadArchetype: (name: string) => Promise<Archetype>;
+	validateArchetype(archetype: unknown): Promise<ValidationResult>;
+	validateFrontmatter: (
+		frontmatter: unknown,
+		defaultArchetypeName?: string
+	) => Promise<ValidationResult>;
+}
+```
+
+- `archetypeSchema`: The archetype schema.
+- `loadArchetype`: Loads an archetype schema by name.
+- `validateArchetype`: Validates an archetype object.
+- `validateFrontmatter`: Validates frontmatter data.
+
+#### `ValidationError`
+
+```typescript
+interface ValidationError {
+	message: string;
+	path: string[];
+}
+```
+
+- `message`: The error message.
+- `path`: The path to the error.
+
+#### `ValidationResult`
+
+```typescript
+interface ValidationResult {
+	valid: boolean;
+	errors: ValidationError[];
+}
+```
+
+- `valid`: Whether the validation passed.
+- `errors`: An array of validation errors.
+
+#### `ValidatorOptions`
+
+```typescript
+interface ValidatorOptions {
+	store: ArchetypeStore;
+	cache?: boolean;
+	validation?: {
+		strictMode?: boolean;
+		allowUnknownFields?: boolean;
+	};
+}
+```
+
+- `store`: The archetype store.
+- `cache`: Whether to cache loaded archetypes.
+- `validation`: Validation options.
+  - `strictMode`: Whether to enforce strict mode.
+  - `allowUnknownFields`: Whether to allow unknown fields.
+
+### Classes
+
+#### `ArchetypeLoadError`
+
+```typescript
+class ArchetypeLoadError extends Error {
+	constructor(message: string, cause?: unknown);
+}
+```
+
+- `message`: The error message.
+- `cause`: The underlying cause of the error.
+
+#### `LocalArchetypeLoadError`
+
+```typescript
+class LocalArchetypeLoadError extends ArchetypeLoadError {
+	constructor(message: string, cause?: unknown);
+}
+```
+
+- `message`: The error message.
+- `cause`: The underlying cause of the error.
+
+#### `RemoteArchetypeLoadError`
+
+```typescript
+class RemoteArchetypeLoadError extends ArchetypeLoadError {
+	constructor(message: string, statusText? string);
+}
+```
+
+- `message`: The error message.
+- `statusText`: The status text of the HTTP response.
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch: `git checkout -b feature/YourFeature`.
+3. Commit your changes: `git commit -m 'Add some feature'`.
+4. Push to the branch: `git push origin feature/YourFeature`.
+5. Open a pull request.
+
+Please ensure your code follows the project's coding standards and include relevant tests.
+
+## License
+
+[MIT](./LICENSE)
+
+## Contact
+
+For questions or support, please open an issue on the GitHub repository.
