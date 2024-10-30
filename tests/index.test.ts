@@ -1,4 +1,4 @@
-import { ArchetypeStore, createValidator } from '@accuser/archetype';
+import { ArchetypeStore, createValidator } from '@typematter/archetype';
 import { describe, expect, it } from 'vitest';
 
 const mockArchetype = {
@@ -17,7 +17,7 @@ const mockArchetype = {
 			}
 		},
 		optional: {
-			extends: { type: 'String' as const }
+			extends: { type: 'Array' as const, items: { type: 'String' as const } }
 		}
 	}
 };
@@ -25,6 +25,7 @@ const mockArchetype = {
 const mockPostArchetype = {
 	name: 'post',
 	version: '1.0.0',
+	extends: ['taggable'],
 	schema: {
 		required: {
 			title: { type: 'String' as const }
@@ -35,9 +36,24 @@ const mockPostArchetype = {
 	}
 };
 
+const mockTaggableArchetype = {
+	name: 'taggable',
+	version: '1.0.0',
+	schema: {
+		required: {
+			tags: { type: 'Array' as const, items: { type: 'String' as const } }
+		},
+		optional: {}
+	}
+};
+
 const store: ArchetypeStore = {
-	load: (name) =>
-		name === 'archetype' ? Promise.resolve(mockArchetype) : Promise.resolve(mockPostArchetype)
+	load: (name) => {
+		if (name === 'archetype') return Promise.resolve(mockArchetype);
+		if (name === 'post') return Promise.resolve(mockPostArchetype);
+		if (name === 'taggable') return Promise.resolve(mockTaggableArchetype);
+		throw new Error(`Archetype "${name}" not found`);
+	}
 };
 
 describe('createValidator', () => {
@@ -67,6 +83,15 @@ describe('createValidator', () => {
 
 			const archetype = await loadArchetype('archetype');
 
+			expect(archetype).toBeDefined();
+		});
+
+		it('should load a valid archetype with extensions', async () => {
+			const { loadArchetype } = await createValidator({ store });
+
+			const archetype = await loadArchetype('post');
+
+			console.dir(archetype, { depth: null });
 			expect(archetype).toBeDefined();
 		});
 	});
@@ -100,7 +125,8 @@ describe('createValidator', () => {
 
 			const frontmatter = {
 				type: 'post',
-				title: 'First Post'
+				title: 'First Post',
+				tags: ['first', 'post']
 			};
 
 			const result = await validateFrontmatter(frontmatter);
