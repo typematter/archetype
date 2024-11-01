@@ -3,7 +3,6 @@ import validateFrontmatter from '$lib/validation/validate-frontmatter.js';
 import type { ArchetypeValidator } from '$types/archetype-validator.js';
 import type { Archetype } from '$types/archetype.js';
 import type { ValidatorOptions } from '$types/validator-options.js';
-import { DEV } from 'esm-env';
 import extendArchetype from './extend-archetype.js';
 
 /**
@@ -23,11 +22,8 @@ import extendArchetype from './extend-archetype.js';
  * });
  */
 const createValidator: (options: ValidatorOptions) => Promise<ArchetypeValidator> = async ({
-	cache = !DEV,
 	store
 }) => {
-	const archetypeCache = cache ? new Map<string, Archetype>() : undefined;
-
 	const archetypeSchema = await store.load('archetype');
 
 	const { errors, valid } = validateArchetype(archetypeSchema, archetypeSchema);
@@ -39,16 +35,8 @@ const createValidator: (options: ValidatorOptions) => Promise<ArchetypeValidator
 	const validator: ArchetypeValidator = {
 		archetypeSchema,
 
-		loadArchetype: async (name, { cache } = {}) => {
-			if (cache !== false && archetypeCache?.has(name)) {
-				return archetypeCache.get(name)!;
-			}
-
+		loadArchetype: async (name) => {
 			const archetype = await store.load(name);
-
-			if (cache !== false) {
-				archetypeCache?.set(name, archetype);
-			}
 
 			const loadedArchetypes = new Map<string, Archetype>();
 

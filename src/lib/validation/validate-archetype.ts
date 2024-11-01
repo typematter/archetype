@@ -29,7 +29,6 @@ const validateArchetype: (archetype: unknown, archetypeSchema: Archetype) => Val
 		}
 	}
 
-	// Then validate optional fields if present
 	for (const [fieldName, fieldSchema] of Object.entries(archetypeSchema.schema.optional) as [
 		string,
 		SchemaField

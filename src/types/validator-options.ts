@@ -7,11 +7,6 @@ interface ValidatorOptions {
 	store: ArchetypeStore;
 
 	/**
-	 * Cache loaded archetypes
-	 */
-	cache?: boolean;
-
-	/**
 	 * Validation options
 	 */
 	validation?: {
