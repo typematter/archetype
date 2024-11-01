@@ -1,3 +1,21 @@
+import { PipelineStage } from '@typematter/pipeline';
+
+declare module '@typematter/pipeline' {
+    interface PipelineContext {
+        content?: string;
+        name?: string;
+    }
+}
+declare const createLocalLoader: (path: string) => PipelineStage;
+
+declare module '@typematter/pipeline' {
+    interface PipelineContext {
+        content?: string;
+        name?: string;
+    }
+}
+declare const createRemoteLoader: (baseUrl: string | URL) => PipelineStage;
+
 interface UnknownField {
     type: string;
     description?: string;
@@ -92,35 +110,14 @@ interface ArchetypeStore {
     load(name: string): Promise<Archetype>;
 }
 
-/**
- * Error thrown when a local archetype fails to load.
- */
-declare class LocalArchetypeLoadError extends ArchetypeLoadError {
-    constructor(name: string, originalError: Error);
+interface StoreOptions {
+    /**
+     * Cache loaded archetypes
+     */
+    cache?: boolean;
 }
-/**
- * Creates a store that loads archetype schemas from local markdown files.
- *
- * @param root - The root directory containing the archetype schemas.
- * @returns A store that loads archetype schemas from local markdown files.
- * @throws {LocalArchetypeLoadError} If the archetype schema could not be loaded
- */
-declare const createLocalStore: (root: string) => ArchetypeStore;
 
-/**
- * Error thrown when a remote archetype fails to load.
- */
-declare class RemoteArchetypeLoadError extends ArchetypeLoadError {
-    constructor(name: string, statusText: string);
-}
-/**
- * Creates a store that loads archetype schemas from remote markdown files.
- *
- * @param baseUrl - The base URL to load the archetype from.
- * @returns A store that loads archetype schemas from remote markdown files.
- * @throws {RemoteArchetypeLoadError} If the archetype schema could not be loaded
- */
-declare const createRemoteStore: (baseUrl: string | URL) => ArchetypeStore;
+declare const createStore: (loadContent: PipelineStage, options?: StoreOptions) => ArchetypeStore;
 
 interface ValidationError {
     path: string[];
@@ -164,10 +161,6 @@ interface ValidatorOptions {
      */
     store: ArchetypeStore;
     /**
-     * Cache loaded archetypes
-     */
-    cache?: boolean;
-    /**
      * Validation options
      */
     validation?: {
@@ -194,4 +187,4 @@ interface ValidatorOptions {
  */
 declare const createValidator: (options: ValidatorOptions) => Promise<ArchetypeValidator>;
 
-export { type Archetype, ArchetypeLoadError, type ArchetypeStore, type ArchetypeValidator, LocalArchetypeLoadError, RemoteArchetypeLoadError, type SchemaField, type ValidationError, type ValidationResult, type ValidatorOptions, createLocalStore, createRemoteStore, createValidator };
+export { type Archetype, ArchetypeLoadError, type ArchetypeStore, type ArchetypeValidator, type SchemaField, type ValidationError, type ValidationResult, type ValidatorOptions, createLocalLoader, createRemoteLoader, createStore, createValidator };

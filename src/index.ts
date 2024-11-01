@@ -1,11 +1,6 @@
-export {
-	LocalArchetypeLoadError,
-	default as createLocalStore
-} from './lib/store/create-local-store.js';
-export {
-	RemoteArchetypeLoadError,
-	default as createRemoteStore
-} from './lib/store/create-remote-store.js';
+export { default as createLocalLoader } from './lib/store/create-local-loader.js';
+export { default as createRemoteLoader } from './lib/store/create-remote-loader.js';
+export { default as createStore } from './lib/store/create-store.js';
 export { default as createValidator } from './lib/validator/create-validator.js';
 export { ArchetypeLoadError, type ArchetypeStore } from './types/archetype-store.js';
 export type { ArchetypeValidator } from './types/archetype-validator.js';
