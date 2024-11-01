@@ -91,7 +91,6 @@ describe('createValidator', () => {
 
 			const archetype = await loadArchetype('post');
 
-			console.dir(archetype, { depth: null });
 			expect(archetype).toBeDefined();
 		});
 	});
@@ -131,7 +130,6 @@ describe('createValidator', () => {
 
 			const result = await validateFrontmatter(frontmatter);
 
-			console.dir(result, { depth: null });
 			expect(result.valid).toBe(true);
 			expect(result.errors).toHaveLength(0);
 		});
