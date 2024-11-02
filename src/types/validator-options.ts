@@ -1,10 +1,11 @@
 import type { ArchetypeStore } from './archetype-store.js';
+import type { StoreOptions } from './store-options.js';
 
 interface ValidatorOptions {
 	/**
-	 * Where to load archetypes from
+	 * Store configuration
 	 */
-	store: ArchetypeStore;
+	store?: ArchetypeStore | StoreOptions;
 
 	/**
 	 * Validation options

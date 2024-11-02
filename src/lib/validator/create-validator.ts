@@ -1,3 +1,4 @@
+import createStore from '$lib/store/create-store.js';
 import validateArchetype from '$lib/validation/validate-archetype.js';
 import validateFrontmatter from '$lib/validation/validate-frontmatter.js';
 import type { ArchetypeValidator } from '$types/archetype-validator.js';
@@ -21,9 +22,20 @@ import extendArchetype from './extend-archetype.js';
  *     store: createLocalStore(path.join(process.cwd(), 'data', 'archetypes')),
  * });
  */
-const createValidator: (options: ValidatorOptions) => Promise<ArchetypeValidator> = async ({
-	store
-}) => {
+const createValidator: (options?: ValidatorOptions) => Promise<ArchetypeValidator> = async ({
+	store: _store = createStore(),
+	validation: { strictMode = false, allowUnknownFields = false } = {}
+} = {}) => {
+	const store =
+		typeof _store === 'object' ? ('load' in _store ? _store : createStore(_store)) : undefined;
+
+	if (store === undefined) {
+		throw new Error('Invalid store configuration');
+	}
+
+	void strictMode;
+	void allowUnknownFields;
+
 	const archetypeSchema = await store.load('archetype');
 
 	const { errors, valid } = validateArchetype(archetypeSchema, archetypeSchema);
