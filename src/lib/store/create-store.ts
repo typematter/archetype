@@ -2,25 +2,28 @@ import archetypeFromContent from '$lib/pipelines/archetype-from-content.js';
 import { ArchetypeLoadError, type ArchetypeStore } from '$types/archetype-store.js';
 import type { Archetype } from '$types/archetype.js';
 import type { StoreOptions } from '$types/store-options.js';
-import { compose, resolve, type PipelineStage } from '@typematter/pipeline';
+import { compose, resolve } from '@typematter/pipeline';
 import { DEV } from 'esm-env';
+import type { PathLike } from 'fs';
+import createLoadContent from './create-load-content.js';
 
-const createStore: (loadContent: PipelineStage, options?: StoreOptions) => ArchetypeStore = (
-	loadContent,
-	{ cache = !DEV } = {}
-) => {
-	const loadArchetype = compose(loadContent, archetypeFromContent);
-
+const createStore: (options?: StoreOptions) => ArchetypeStore = ({
+	cache = !DEV,
+	loaders
+} = {}) => {
+	const loadArchetype = compose(createLoadContent(loaders), archetypeFromContent);
 	const archetypeCache = cache ? new Map<string, Archetype>() : undefined;
 
 	return {
-		load: async (name) => {
+		load: async (path: PathLike) => {
+			const name = path.toString();
+
 			if (archetypeCache?.has(name)) {
 				return archetypeCache.get(name)!;
 			}
 
 			try {
-				const { archetype } = await loadArchetype({ name }).then(resolve);
+				const { archetype } = await loadArchetype({ path }).then(resolve);
 
 				if (archetype === undefined || archetype === null) {
 					throw 'Failed to load archetype';
@@ -32,10 +35,9 @@ const createStore: (loadContent: PipelineStage, options?: StoreOptions) => Arche
 
 				return archetype;
 			} catch (error) {
-				throw new ArchetypeLoadError(
-					name,
-					error instanceof Error ? error : new Error(String(error))
-				);
+				throw typeof error === 'string'
+					? new ArchetypeLoadError(error)
+					: new ArchetypeLoadError(`Error loading ${name}`, error);
 			}
 		}
 	};
