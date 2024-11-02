@@ -1,7 +1,8 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { parse } from 'yaml';
 import { DEV } from 'esm-env';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { cwd } from 'node:process';
 
 // Generated with esbuild
 
@@ -46,25 +47,6 @@ var resolve = (result) => {
   }
 };
 var resolve_default = resolve;
-var createLocalLoader = (path) => async ({ name, ...rest }) => {
-  if (name === void 0 || name === null) {
-    return failure("`name` is missing from the pipeline context");
-  }
-  const content = await readFile(join(path, `${name}.md`), "utf-8");
-  return success_default({ ...rest, content });
-};
-var create_local_loader_default = createLocalLoader;
-
-// src/lib/store/create-remote-loader.ts
-var createRemoteLoader = (baseUrl) => async ({ name, ...rest }) => {
-  if (name === void 0 || name === null) {
-    return failure("`name` is missing from the pipeline context");
-  }
-  const url = new URL(`${name}.md`, baseUrl);
-  const content = await fetch(url).then((res) => res.text());
-  return success_default({ ...rest, content });
-};
-var create_remote_loader_default = createRemoteLoader;
 
 // src/lib/pipelines/stages/archetype-from-frontmatter.ts
 var archetypeFromFrontmatter = async ({ frontmatter, ...rest }) => {
@@ -112,16 +94,69 @@ var ArchetypeLoadError = class extends Error {
     this.cause = cause;
   }
 };
-var createStore = (loadContent, { cache = !DEV } = {}) => {
-  const loadArchetype = compose_default(loadContent, archetype_from_content_default);
+var fileLoader = {
+  canHandle: (path) => path.toString().match(/^file:\/\/|^\/|^\.\.?\//) !== null,
+  load: async (path) => await readFile(`${path.toString()}.md`, "utf-8")
+};
+var file_loader_default = fileLoader;
+
+// src/lib/store/loaders/http-loader.ts
+var httpLoader = {
+  canHandle: (path) => path.toString().match(/^https?:\/\//) !== null,
+  load: async (path) => await fetch(path.toString()).then((res) => res.text())
+};
+var http_loader_default = httpLoader;
+var nameLoader = {
+  canHandle: (path) => path.toString().match(/^[\w][\w-]*$/) !== null,
+  load: (path) => {
+    const filename = join(cwd(), "data", "archetypes", `${path.toString()}.md`);
+    return readFile(filename, "utf-8");
+  }
+};
+var name_loader_default = nameLoader;
+var pathLoader = {
+  canHandle: (path) => {
+    const filename = path.toString();
+    return (filename.startsWith("/") || filename.startsWith("./") || filename.startsWith("../")) && filename.endsWith(".md");
+  },
+  load: (path) => readFile(path.toString(), "utf-8")
+};
+var path_loader_default = pathLoader;
+
+// src/lib/store/create-load-content.ts
+var defaultLoaders = [name_loader_default, path_loader_default, file_loader_default, http_loader_default];
+var createLoadContent = (loaders = defaultLoaders) => async ({ path, ...rest }) => {
+  if (path === void 0 || path === null) {
+    return failure("`path` is missing from the pipeline context");
+  }
+  const loader = loaders.find((loader2) => loader2.canHandle(path));
+  if (loader) {
+    try {
+      const content = await loader.load(path);
+      return success_default({ ...rest, content });
+    } catch (error) {
+      return failure(error);
+    }
+  }
+  return failure("No suitable strategy found");
+};
+var create_load_content_default = createLoadContent;
+
+// src/lib/store/create-store.ts
+var createStore = ({
+  cache = !DEV,
+  loaders
+} = {}) => {
+  const loadArchetype = compose_default(create_load_content_default(loaders), archetype_from_content_default);
   const archetypeCache = cache ? /* @__PURE__ */ new Map() : void 0;
   return {
-    load: async (name) => {
+    load: async (path) => {
+      const name = path.toString();
       if (archetypeCache?.has(name)) {
         return archetypeCache.get(name);
       }
       try {
-        const { archetype } = await loadArchetype({ name }).then(resolve_default);
+        const { archetype } = await loadArchetype({ path }).then(resolve_default);
         if (archetype === void 0 || archetype === null) {
           throw "Failed to load archetype";
         }
@@ -130,10 +165,7 @@ var createStore = (loadContent, { cache = !DEV } = {}) => {
         }
         return archetype;
       } catch (error) {
-        throw new ArchetypeLoadError(
-          name,
-          error instanceof Error ? error : new Error(String(error))
-        );
+        throw typeof error === "string" ? new ArchetypeLoadError(error) : new ArchetypeLoadError(`Error loading ${name}`, error);
       }
     }
   };
@@ -467,8 +499,13 @@ var extend_archetype_default = extendArchetype;
 
 // src/lib/validator/create-validator.ts
 var createValidator = async ({
-  store
-}) => {
+  store: _store = createStore(),
+  validation: { strictMode = false, allowUnknownFields = false } = {}
+} = {}) => {
+  const store = typeof _store === "object" ? "load" in _store ? _store : createStore(_store) : void 0;
+  if (store === void 0) {
+    throw new Error("Invalid store configuration");
+  }
   const archetypeSchema = await store.load("archetype");
   const { errors, valid } = validate_archetype_default(archetypeSchema, archetypeSchema);
   if (!valid) {
@@ -501,6 +538,6 @@ var createValidator = async ({
 };
 var create_validator_default = createValidator;
 
-export { ArchetypeLoadError, create_local_loader_default as createLocalLoader, create_remote_loader_default as createRemoteLoader, createStore, create_validator_default as createValidator };
+export { ArchetypeLoadError, create_validator_default as createValidator };
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map

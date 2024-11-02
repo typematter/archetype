@@ -1,20 +1,4 @@
-import { PipelineStage } from '@typematter/pipeline';
-
-declare module '@typematter/pipeline' {
-    interface PipelineContext {
-        content?: string;
-        name?: string;
-    }
-}
-declare const createLocalLoader: (path: string) => PipelineStage;
-
-declare module '@typematter/pipeline' {
-    interface PipelineContext {
-        content?: string;
-        name?: string;
-    }
-}
-declare const createRemoteLoader: (baseUrl: string | URL) => PipelineStage;
+import { PathLike } from 'node:fs';
 
 interface UnknownField {
     type: string;
@@ -92,33 +76,6 @@ interface Archetype {
     extends?: string[];
 }
 
-declare class ArchetypeLoadError extends Error {
-    constructor(message: string, cause?: unknown);
-}
-interface ArchetypeStore {
-    /**
-     * Load an archetype schema by name.
-     *
-     * @param name - The name of the archetype to load.
-     * @returns A promise that resolves to the loaded archetype schema.
-     *
-     * @throws {ArchetypeLoadError} If the archetype schema could not be loaded
-     *
-     * @example
-     * const archetype = await store.load('post');
-     */
-    load(name: string): Promise<Archetype>;
-}
-
-interface StoreOptions {
-    /**
-     * Cache loaded archetypes
-     */
-    cache?: boolean;
-}
-
-declare const createStore: (loadContent: PipelineStage, options?: StoreOptions) => ArchetypeStore;
-
 interface ValidationError {
     path: string[];
     message: string;
@@ -155,11 +112,45 @@ interface ArchetypeValidator {
     readonly validateFrontmatter: (frontmatter: unknown) => Promise<ValidationResult>;
 }
 
+declare class ArchetypeLoadError extends Error {
+    constructor(message: string, cause?: unknown);
+}
+interface ArchetypeStore {
+    /**
+     * Load an archetype schema by name.
+     *
+     * @param name - The name of the archetype to load.
+     * @returns A promise that resolves to the loaded archetype schema.
+     *
+     * @throws {ArchetypeLoadError} If the archetype schema could not be loaded
+     *
+     * @example
+     * const archetype = await store.load('post');
+     */
+    load(name: string): Promise<Archetype>;
+}
+
+interface Loader {
+    canHandle(path: PathLike): boolean;
+    load(path: PathLike): Promise<string>;
+}
+
+interface StoreOptions {
+    /**
+     * Cache loaded archetypes
+     */
+    cache?: boolean;
+    /**
+     * Load strategies to use
+     */
+    loaders?: Loader[];
+}
+
 interface ValidatorOptions {
     /**
-     * Where to load archetypes from
+     * Store configuration
      */
-    store: ArchetypeStore;
+    store?: ArchetypeStore | StoreOptions;
     /**
      * Validation options
      */
@@ -185,6 +176,6 @@ interface ValidatorOptions {
  *     store: createLocalStore(path.join(process.cwd(), 'data', 'archetypes')),
  * });
  */
-declare const createValidator: (options: ValidatorOptions) => Promise<ArchetypeValidator>;
+declare const createValidator: (options?: ValidatorOptions) => Promise<ArchetypeValidator>;
 
-export { type Archetype, ArchetypeLoadError, type ArchetypeStore, type ArchetypeValidator, type SchemaField, type ValidationError, type ValidationResult, type ValidatorOptions, createLocalLoader, createRemoteLoader, createStore, createValidator };
+export { type Archetype, ArchetypeLoadError, type ArchetypeStore, type ArchetypeValidator, type Loader, type SchemaField, type StoreOptions, type ValidationError, type ValidationResult, type ValidatorOptions, createValidator };
