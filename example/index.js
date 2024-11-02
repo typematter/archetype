@@ -1,12 +1,10 @@
-import { createLocalStore, createValidator } from '@typematter/archetype';
-import { readFileSync } from 'node:fs';
+import { createValidator } from '@typematter/archetype';
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { parse } from 'yaml';
 
-const validator = await createValidator({
-	store: createLocalStore(join(cwd(), 'data', 'archetypes'))
-});
+const validator = await createValidator();
 
 const postArchetype = await validator.loadArchetype('post');
 
@@ -14,7 +12,7 @@ console.log('Post archetype:');
 console.dir(postArchetype, { depth: null });
 console.log();
 
-const post = readFileSync(join(cwd(), 'data', 'posts', 'first-post.md'), 'utf8');
+const post = await readFile(join(cwd(), 'data', 'posts', 'first-post.md'), 'utf8');
 const frontmatter = parse(post.split('---\n')[1]);
 
 console.log('Frontmatter:');
