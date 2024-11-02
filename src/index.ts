@@ -1,11 +1,10 @@
-export { default as createLocalLoader } from './lib/store/create-local-loader.js';
-export { default as createRemoteLoader } from './lib/store/create-remote-loader.js';
-export { default as createStore } from './lib/store/create-store.js';
 export { default as createValidator } from './lib/validator/create-validator.js';
 export { ArchetypeLoadError, type ArchetypeStore } from './types/archetype-store.js';
 export type { ArchetypeValidator } from './types/archetype-validator.js';
 export type { Archetype } from './types/archetype.js';
+export type { Loader } from './types/loader.js';
 export type { SchemaField } from './types/schema-field.js';
+export type { StoreOptions } from './types/store-options.js';
 export type { ValidationError } from './types/validation-error.js';
 export type { ValidationResult } from './types/validation-result.js';
 export type { ValidatorOptions } from './types/validator-options.js';
