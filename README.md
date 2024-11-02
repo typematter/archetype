@@ -9,8 +9,6 @@ Archetype is a robust TypeScript library designed to define, load, and manage co
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-  - [Creating a local store](#creating-a-local-store)
-  - [Creating a remote store](#creating-a-remote-store)
   - [Loading an archetype](#loading-an-archetype)
   - [Validating an archetype](#validating-an-archetype)
   - [Validating frontmatter](#validating-frontmatter)
@@ -29,54 +27,22 @@ Archetype is a robust TypeScript library designed to define, load, and manage co
 
 ## Installation
 
+Install the package directly from the [repo](https://github.com/typematter/archetype):
+
 ```bash
-npm install archetype
+pnpm install typematter/archetype
 ```
+
+NPM packages will be available soon.
 
 ## Usage
-
-### Creating a local store
-
-```typescript
-import { createLocalStore } from '@typematter/archetype';
-
-const localStore = createLocalStore('/path/to/archetypes');
-
-await localStore
-	.load('post')
-	.then((archetype) => {
-		console.log('Loaded archetype:', archetype);
-	})
-	.catch((error) => {
-		console.error(error);
-	});
-```
-
-### Creating a remote store
-
-```typescript
-import { createRemoteStore } from '@typematter/archetype';
-
-const remoteStore = createRemoteStore('https://example.com/archetypes');
-
-await remoteStore
-	.load('post')
-	.then((archetype) => {
-		console.log('Loaded archetype:', archetype);
-	})
-	.catch((error) => {
-		console.error(error);
-	});
-```
 
 ### Loading an archetype
 
 ```typescript
 import { createValidator } from '@typematter/archetype';
 
-const validator = createValidator({
-	store: localStore
-});
+const validator = createValidator();
 
 const postArchetype = await validator.loadArchetype('post');
 ```
@@ -205,28 +171,6 @@ class ArchetypeLoadError extends Error {
 
 - `message`: The error message.
 - `cause`: The underlying cause of the error.
-
-#### `LocalArchetypeLoadError`
-
-```typescript
-class LocalArchetypeLoadError extends ArchetypeLoadError {
-	constructor(message: string, cause?: unknown);
-}
-```
-
-- `message`: The error message.
-- `cause`: The underlying cause of the error.
-
-#### `RemoteArchetypeLoadError`
-
-```typescript
-class RemoteArchetypeLoadError extends ArchetypeLoadError {
-	constructor(message: string, statusText? string);
-}
-```
-
-- `message`: The error message.
-- `statusText`: The status text of the HTTP response.
 
 ## Contributing
 
