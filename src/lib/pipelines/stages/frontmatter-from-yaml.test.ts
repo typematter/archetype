@@ -29,7 +29,7 @@ describe('frontmatterFromYaml', () => {
 		const result = await frontmatterFromYaml({ yaml });
 
 		if (result.ok) {
-			expect(result.value.frontmatter).toEqual({});
+			expect(result.value.frontmatter).toBeUndefined();
 		} else {
 			throw new Error('Expected a successful result but got an error');
 		}

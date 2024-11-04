@@ -11,7 +11,10 @@ const createStore: (options?: StoreOptions) => ArchetypeStore = ({
 	cache = !DEV,
 	loaders
 } = {}) => {
-	const loadArchetype = compose(createLoadContent(loaders), archetypeFromContent);
+	const loadArchetype = compose<{ archetype?: Archetype; path?: PathLike }>([
+		createLoadContent(loaders),
+		archetypeFromContent
+	]);
 	const archetypeCache = cache ? new Map<string, Archetype>() : undefined;
 
 	return {

@@ -1,14 +1,6 @@
 import { failure, success, type PipelineStage } from '@typematter/pipeline';
 
-declare module '@typematter/pipeline' {
-	interface PipelineContext {
-		content?: string;
-		markdown?: string;
-		yaml?: string;
-	}
-}
-
-const splitContent: PipelineStage = async ({ content, ...rest }) => {
+const splitContent: PipelineStage = async ({ content, ...rest }: { content?: string }) => {
 	if (content === undefined || content === null) {
 		return failure('`content` is missing from the pipeline context');
 	}

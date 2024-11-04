@@ -1,24 +1,14 @@
 import { failure, success, type PipelineStage } from '@typematter/pipeline';
 import { parse } from 'yaml';
 
-declare module '@typematter/pipeline' {
-	interface PipelineContext {
-		frontmatter?: Record<string, unknown>;
-		yaml?: string;
-	}
-}
-
-const frontmatterFromYaml: PipelineStage = async ({ yaml, ...rest }) => {
+const frontmatterFromYaml: PipelineStage = async ({ yaml, ...rest }: { yaml?: string }) => {
 	if (yaml === undefined || yaml === null) {
 		return failure('`yaml` is missing from the pipeline context');
 	}
 
-	const frontmatter: Record<string, unknown> = parse(yaml) ?? {};
+	const frontmatter: Record<string, unknown> = parse(yaml) ?? undefined;
 
-	return success({
-		...rest,
-		frontmatter
-	});
+	return success({ ...rest, frontmatter });
 };
 
 export default frontmatterFromYaml;
