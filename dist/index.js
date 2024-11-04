@@ -6,7 +6,7 @@ import { cwd } from 'node:process';
 
 // Generated with esbuild
 
-// node_modules/.pnpm/@typematter+pipeline@https+++codeload.github.com+typematter+pipeline+tar.gz+acd739b0700ace64d07fc541c14be3973fa27bfc/node_modules/@typematter/pipeline/dist/index.js
+// node_modules/.pnpm/@typematter+pipeline@https+++codeload.github.com+typematter+pipeline+tar.gz+90e0e21c93f803654f7a5bec6aad97ba14475ddb/node_modules/@typematter/pipeline/dist/index.js
 var PipelineError = class extends Error {
   constructor(message) {
     super(message);
@@ -22,13 +22,13 @@ var success = (value) => ({
   value
 });
 var success_default = success;
-var compose = (...stages) => async (context) => {
-  let currentContext = context;
+var compose = (stages, { mutate } = {}) => async (context) => {
+  let currentContext = mutate === true ? context : structuredClone(context);
   for (const stage of stages) {
     try {
       const result = await stage(currentContext);
       if (result.ok) {
-        currentContext = result.value;
+        currentContext = mutate === true ? Object.assign(currentContext, result.value) : result.value;
       } else {
         return result;
       }
@@ -49,26 +49,23 @@ var resolve = (result) => {
 var resolve_default = resolve;
 
 // src/lib/pipelines/stages/archetype-from-frontmatter.ts
-var archetypeFromFrontmatter = async ({ frontmatter, ...rest }) => {
+var archetypeFromFrontmatter = async ({
+  frontmatter,
+  ...rest
+}) => {
   if (frontmatter === void 0 || frontmatter === null) {
     return failure("`frontmatter` is missing from the pipeline context");
   }
   const archetype = frontmatter;
-  return success_default({
-    ...rest,
-    archetype
-  });
+  return success_default({ ...rest, archetype });
 };
 var archetype_from_frontmatter_default = archetypeFromFrontmatter;
 var frontmatterFromYaml = async ({ yaml, ...rest }) => {
   if (yaml === void 0 || yaml === null) {
     return failure("`yaml` is missing from the pipeline context");
   }
-  const frontmatter = parse(yaml) ?? {};
-  return success_default({
-    ...rest,
-    frontmatter
-  });
+  const frontmatter = parse(yaml) ?? void 0;
+  return success_default({ ...rest, frontmatter });
 };
 var frontmatter_from_yaml_default = frontmatterFromYaml;
 
@@ -83,7 +80,7 @@ var splitContent = async ({ content, ...rest }) => {
 var split_content_default = splitContent;
 
 // src/lib/pipelines/archetype-from-content.ts
-var archetypeFromContent = compose_default(split_content_default, frontmatter_from_yaml_default, archetype_from_frontmatter_default);
+var archetypeFromContent = compose_default([split_content_default, frontmatter_from_yaml_default, archetype_from_frontmatter_default]);
 var archetype_from_content_default = archetypeFromContent;
 
 // src/types/archetype-store.ts
@@ -147,7 +144,10 @@ var createStore = ({
   cache = !DEV,
   loaders
 } = {}) => {
-  const loadArchetype = compose_default(create_load_content_default(loaders), archetype_from_content_default);
+  const loadArchetype = compose_default([
+    create_load_content_default(loaders),
+    archetype_from_content_default
+  ]);
   const archetypeCache = cache ? /* @__PURE__ */ new Map() : void 0;
   return {
     load: async (path) => {
